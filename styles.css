@@ -1041,3 +1041,21 @@ body.is-video .statusbar { transition: background .18s linear .28s, color .18s l
   body.is-video .screen { transition: background .18s linear .28s, --strip .3s var(--ease-sheet); }
   body.demo-on .demo-status { min-height: 52px; top: env(safe-area-inset-top, 0px); transform: none; }
 }
+
+/* Скрытое окошко демо не перехватывает нажатия: на мобильном его кнопка лежит ровно над «Как смотреть» */
+.demo-status:not(.is-on) .ds__next { pointer-events: none !important; }
+@media (max-width: 760px) {
+  /* «Готово»/«Закрыть» — такая же синяя кнопка, как «Далее»: на чёрной полосе видео серая кнопка не видна */
+  .demo-status.is-done .ds__next, body[data-theme="light"] .demo-status.is-done .ds__next { background: var(--accent); color: #fff; }
+  /* пульсация «Далее» в узкой полосе — чуть заметнее, чтобы читалась на маленьком экране */
+  .demo-status.is-waiting .ds__next { animation: nextIn .4s var(--ease), nextPulseM 1.6s ease-out .4s infinite; }
+  /* выбранная тема подсвечивается и на чёрной полосе экрана видео */
+  body[data-theme="light"].is-video .theme-switch button.is-on { color: var(--link); }
+}
+@keyframes nextPulseM {
+  0%   { box-shadow: 0 0 0 0 rgba(38,136,235,.75); transform: scale(1); }
+  35%  { transform: scale(1.07); }
+  70%  { box-shadow: 0 0 0 8px rgba(38,136,235,0); transform: scale(1); }
+  100% { box-shadow: 0 0 0 0 rgba(38,136,235,0); }
+}
+@media (prefers-reduced-motion: reduce) { .demo-status.is-waiting .ds__next { animation: none !important; } }

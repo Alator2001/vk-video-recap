@@ -719,7 +719,7 @@
   addEventListener('resize', placeStatus);
   function setStatus(text, i = 0, n = 0, done = false) {
     document.body.classList.toggle('demo-on', !!text);
-    if (!text) { demoStatus.classList.remove('is-on', 'is-waiting'); return; }
+    if (!text) { demoStatus.classList.remove('is-on', 'is-waiting', 'is-done'); return; }
     placeStatus();
     $('.ds__scn', demoStatus).textContent = DEMO_NAMES[demoKind] || '';
     const t = $('.demo-status__text', demoStatus);
