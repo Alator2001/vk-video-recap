@@ -1071,3 +1071,6 @@ body.is-video .statusbar { transition: background .18s linear .28s, color .18s l
 .player .scene, .player video { transition: opacity .18s ease; }
 .player.is-switching .scene, .player.is-switching video { opacity: 0; }
 .screen .player__next { cursor: pointer; }
+/* Подложка-иллюстрация под видео (запасной вариант, пока ролик не загрузился) не выходит за границы плеера:
+   раньше её светлый «стол» выглядывал из-под нижнего края видео тонкой серой полоской */
+.player .scene { inset: 0; clip-path: inset(0 0 3px 0); }
