@@ -12,7 +12,7 @@
     W = cvs.clientWidth; H = cvs.clientHeight;
     cvs.width = Math.round(W * dpr); cvs.height = Math.round(H * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    const n = Math.round((W * H) / 9000);
+    const n = Math.round((W * H) / 16000);   // реже — фон не спорит с телефоном
     stars = Array.from({ length: n }, () => ({
       x: Math.random() * W, y: Math.random() * H,
       r: 0.6 + Math.random() * 1.4,
@@ -37,8 +37,8 @@
   function palette() {
     const light = document.body.dataset.theme === 'light';
     return light
-      ? { a: 0.95, c1: '38,120,235', c2: '125,80,235', tail: '60,120,235', dot: 0.9, sz: 1.4 }   // на белом фоне нужны насыщенные цвета и почти полная непрозрачность
-      : { a: 0.75, c1: '200,222,255', c2: '190,170,255', tail: '170,205,255' };
+      ? { a: 0.6, c1: '38,120,235', c2: '125,80,235', tail: '60,120,235', dot: 0.9, sz: 1.4 }   // на белом фоне нужны насыщенные цвета и почти полная непрозрачность
+      : { a: 0.5, c1: '200,222,255', c2: '190,170,255', tail: '170,205,255' };
   }
 
   function frame(now) {
@@ -57,7 +57,7 @@
     }
     // падающая звезда раз в 5–9 секунд
     if (now > nextShoot) {
-      nextShoot = now + 5000 + Math.random() * 4000;
+      nextShoot = now + 9000 + Math.random() * 7000;
       const ang = (18 + Math.random() * 14) * Math.PI / 180;
       shooters.push({ x: W * (0.2 + Math.random() * 0.7), y: -20, vx: -Math.cos(ang) * 520, vy: Math.sin(ang) * 520, born: now, life: 1300 });
     }

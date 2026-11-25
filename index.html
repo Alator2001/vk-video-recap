@@ -21,7 +21,7 @@
   <meta name="twitter:title" content="Продолжить с пересказом — концепт для VK Видео" />
   <meta name="twitter:description" content="ИИ-пересказ просмотренной части, когда возвращаешься к длинному видео. Без спойлеров." />
   <meta name="twitter:image" content="https://alator2001.github.io/vk-video-recap/og.png" />
-  <link rel="stylesheet" href="styles.css?v=82" />
+  <link rel="stylesheet" href="styles.css?v=84" />
 </head>
 <body data-mode="after" data-theme="dark">
   <!-- Тема выставляется до первой отрисовки — без вспышки тёмной темы у тех, кто выбрал светлую -->
@@ -108,24 +108,21 @@
     </div>
     <div class="phone" id="phone">
       <!-- боковые кнопки корпуса -->
-      <i class="hw hw--action" aria-hidden="true"></i>
-      <i class="hw hw--vol-up" aria-hidden="true"></i>
-      <i class="hw hw--vol-down" aria-hidden="true"></i>
       <i class="hw hw--power" aria-hidden="true"></i>
-      <i class="hw hw--camera" aria-hidden="true"></i>
+      <i class="hw hw--vol" aria-hidden="true"></i>
       <div class="screen" id="screen">
 
-        <!-- Статус-бар iOS (iPhone 17 Pro): пропорции значков и раскладка — как в системе -->
-        <div class="statusbar" aria-hidden="true">
+        <!-- Статус-бар Android 16 (Google Pixel 10 Pro): время слева, камера-«точка» по центру, значки справа -->
+        <div class="statusbar statusbar--android" aria-hidden="true">
           <div class="sb-left"><span class="sb-time">9:41</span></div>
-          <span class="island"><i class="island__cam"></i></span>
+          <span class="punch"></span>
           <div class="sb-right">
-            <!-- сотовая связь: 4 столбика по возрастанию -->
-            <svg class="sb-cell" viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="7.4" width="3.2" height="4.6" rx="1"/><rect x="4.8" y="5" width="3.2" height="7" rx="1"/><rect x="9.6" y="2.6" width="3.2" height="9.4" rx="1"/><rect x="14.4" y="0" width="3.2" height="12" rx="1"/></svg>
-            <!-- Wi-Fi: три сектора, как в SF Symbols -->
-            <svg class="sb-wifi" viewBox="0 0 16 12" fill="currentColor"><path d="M8 2.4c2.3 0 4.4.88 6 2.33.18.16.45.16.62-.01l1.04-1.05a.45.45 0 0 0-.01-.65A11.05 11.05 0 0 0 8 0C5.03 0 2.33 1.15.35 3.02a.45.45 0 0 0-.01.65l1.04 1.05c.17.17.44.17.62.01A8.83 8.83 0 0 1 8 2.4Z"/><path d="M8 5.97c1.33 0 2.55.49 3.48 1.3.18.16.45.15.62-.02l1.04-1.05a.45.45 0 0 0-.02-.66A7.42 7.42 0 0 0 8 3.57c-1.97 0-3.76.75-5.12 1.97a.45.45 0 0 0-.02.66L3.9 7.25c.17.17.44.18.62.02A5.27 5.27 0 0 1 8 5.97Z"/><path d="M10.07 8.84c.18-.18.17-.47-.03-.63A3.2 3.2 0 0 0 8 7.5c-.77 0-1.48.27-2.04.71-.2.16-.21.45-.03.63l1.75 1.77c.18.18.46.18.64 0l1.75-1.77Z"/></svg>
-            <!-- батарея: контур 35%, заряд, «носик» -->
-            <svg class="sb-batt" viewBox="0 0 28 13"><rect class="sb-batt__body" x=".5" y=".5" width="24" height="12" rx="3.8"/><rect class="sb-batt__lvl" x="2" y="2" width="21" height="9" rx="2.4"/><path class="sb-batt__cap" d="M26 4.4v4.2c.84-.34 1.4-1.17 1.4-2.1s-.56-1.76-1.4-2.1Z"/></svg>
+            <!-- Wi-Fi: сплошной веер, как в Material -->
+            <svg class="sb-wifi" viewBox="0 0 24 24" fill="currentColor"><path d="M12 20.5 1.2 7.4A16.9 16.9 0 0 1 12 3.5c4.1 0 7.9 1.47 10.8 3.9L12 20.5Z"/></svg>
+            <!-- сотовая сеть: треугольник -->
+            <svg class="sb-cell" viewBox="0 0 24 24" fill="currentColor"><path d="M2.5 21.5h19v-19z"/></svg>
+            <!-- батарея: горизонтальная «таблетка», как в Android 16 -->
+            <svg class="sb-batt" viewBox="0 0 26 13"><rect class="sb-batt__body" x=".75" y=".75" width="22" height="11.5" rx="3.6"/><rect class="sb-batt__lvl" x="2.4" y="2.4" width="15" height="8.2" rx="2.2"/><rect class="sb-batt__cap" x="24" y="4.3" width="1.6" height="4.4" rx=".8"/></svg>
           </div>
         </div>
 
@@ -405,8 +402,8 @@
     </defs>
   </svg>
 
-  <script src="data.js?v=4"></script>
-  <script src="app.js?v=83"></script>
-  <script src="fx.js?v=34"></script>
+  <script src="data.js?v=5"></script>
+  <script src="app.js?v=84"></script>
+  <script src="fx.js?v=35"></script>
 </body>
 </html>

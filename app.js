@@ -66,9 +66,10 @@
   function thumb(th, o = {}) {
     const size = o.big ? 30 : o.wide ? 24 : 17;
     return `<div class="thumb">
-      <div class="thumb__art${th.img ? ' thumb__art--img' : ''}" style="${th.img ? `background:#222 url('${th.img}') center/cover` : `background:linear-gradient(135deg,${th.from},${th.to})`}">
-        ${th.text ? `<span class="thumb__txt" style="font-size:${size}px;color:${th.accent}">${esc(th.text)}</span>` : ''}
-        ${th.img ? '' : '<i class="thumb__face"></i>'}
+      <div class="thumb__art${th.img ? ' thumb__art--img' : ''}${th.text ? ' has-txt' : ''}" style="${th.img ? `background:#222 url('${th.img}') center/cover` : `background:linear-gradient(135deg,${th.from},${th.to})`}">
+        ${th.text ? (th.plate
+          ? `<span class="thumb__txt thumb__txt--plate" style="font-size:${size}px">${esc(th.text).split('\n').map(l => `<b style="background:${th.plate}">${l}</b>`).join('<br>')}</span>`
+          : `<span class="thumb__txt" style="font-size:${size}px">${esc(th.text)}</span>`) : ''}
       </div>
       ${o.ai ? `<span class="ai-tag"><svg viewBox="0 0 24 24"><use href="#i-spark"/></svg>Есть пересказ</span>` : ''}
       ${o.left ? `<span class="thumb__left">${o.left}</span>` : ''}

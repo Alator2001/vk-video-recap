@@ -37,7 +37,7 @@
   --ai-3: #FF4B9C;
 
   --r-s: 8px; --r-m: 12px; --r-l: 16px; --r-xl: 24px; --r-pill: 999px;
-  --font: -apple-system, system-ui, Roboto, "Helvetica Neue", Arial, sans-serif; /* как в вебе VK Видео */
+  --font: "VK Sans Text", -apple-system, system-ui, Roboto, "Helvetica Neue", Arial, sans-serif; /* фирменный VK Sans — если установлен у смотрящего (шрифт корпоративный, в прототип не встроен); иначе системный */
   --ease: cubic-bezier(.2,.8,.2,1);
   --ease-sheet: cubic-bezier(.32,.72,0,1);
 }
@@ -90,7 +90,7 @@ body[data-mode="before"] :is(#scenarioGroup, #styleGroup) { opacity: .35; pointe
 
 /* ================= Сцена и телефон ================= */
 .stage { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; min-width: 0; }
-/* Рамка: iPhone 17 Pro (экран 402×874 pt, Dynamic Island, корпус Deep Blue) */
+/* Рамка (базовые значения; итоговый вид — Google Pixel 10 Pro, блок «Рамка Android» в конце файла) */
 .phone {
   --bezel: 12px;
   position: relative; flex: none; width: calc(402px + var(--bezel) * 2); height: calc(874px + var(--bezel) * 2);
@@ -1074,3 +1074,73 @@ body.is-video .statusbar { transition: background .18s linear .28s, color .18s l
 /* Подложка-иллюстрация под видео (запасной вариант, пока ролик не загрузился) не выходит за границы плеера:
    раньше её светлый «стол» выглядывал из-под нижнего края видео тонкой серой полоской */
 .player .scene { inset: 0; clip-path: inset(0 0 3px 0); }
+
+/* ===== Обложки как у авторов VK Видео: строчные буквы, без «кричащего» капса; часть обложек — просто кадр ===== */
+.thumb__art--img::before { background: linear-gradient(90deg, rgba(0,0,0,.5) 0%, rgba(0,0,0,.16) 55%, transparent 80%); }
+.thumb__art--img:not(.has-txt)::before { display: none; }
+.thumb__txt { font-weight: 800; font-stretch: normal; text-transform: none; line-height: 1.06; letter-spacing: -.015em; color: #fff;
+  text-shadow: 0 1px 2px rgba(0,0,0,.55), 0 0 18px rgba(0,0,0,.35); }
+.thumb__txt--plate { text-shadow: none; line-height: 1.32; }
+.thumb__txt--plate b { color: #111; font-weight: 800; padding: .04em .26em; border-radius: .16em; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+
+/* Крестик плашки: выглядит как прежде (32 pt), а зона нажатия — 44 pt, как требует гайд для пальца */
+.peek__close::after { content: ""; position: absolute; inset: -6px; border-radius: 50%; }
+
+/* Фон демо тише: телефон — главный */
+.stage::before { background: radial-gradient(closest-side, rgba(70,120,255,.14), transparent); }
+.stage::after { background: radial-gradient(closest-side, rgba(150,100,255,.11), transparent); }
+@media (min-width: 761px) {
+  body[data-theme="light"]::before { background: radial-gradient(closest-side, rgba(38,136,235,.4), rgba(90,168,255,.18) 50%, transparent); }
+  body[data-theme="light"]::after { background: radial-gradient(closest-side, rgba(139,92,246,.34), rgba(167,123,255,.15) 50%, transparent); }
+}
+
+/* =====================================================================
+   Рамка Android: Google Pixel 10 Pro — экран 412×915 dp, камера-«точка» по центру,
+   ровные тонкие рамки, кнопки справа. Статус-бар и полоска жестов — как в Android 16.
+   ===================================================================== */
+.phone { --bezel: 10px; width: calc(412px + var(--bezel) * 2); height: calc(915px + var(--bezel) * 2); border-radius: 54px;
+  background: linear-gradient(150deg, #6a6e76 0%, #2c2e33 20%, #1b1c20 50%, #2f3137 80%, #6d717a 100%);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.16), inset 0 0 0 2px #0c0d10, 0 0 0 1px #0a0b0d, 0 50px 120px rgba(0,0,0,.6), 0 12px 30px rgba(0,0,0,.4); }
+.phone::before { inset: 3px; border-radius: 51px; }
+.screen { --safe-top: 40px; --safe-bottom: 24px; width: 412px; height: 915px; border-radius: 44px; }
+.hw--power { right: -3px; top: 196px; height: 58px; }
+.hw--vol { right: -3px; top: 286px; height: 116px; background: linear-gradient(270deg, #1d1e22, #5d616a 60%, #2b2d33); }
+body[data-theme="light"] .phone { background: linear-gradient(150deg, #fbfaf7 0%, #dcd8d1 20%, #efece7 50%, #d3cec6 80%, #f8f6f2 100%);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.7), inset 0 0 0 2px #b9b4ac, 0 0 0 1px #a9a49c, 0 40px 100px rgba(40,50,70,.22), 0 10px 26px rgba(40,50,70,.16); }
+body[data-theme="light"] .hw--vol, body[data-theme="light"] .hw--power { background: linear-gradient(270deg, #a8a39b, #eeebe6 60%, #c9c4bc); }
+
+.statusbar--android { display: flex; align-items: center; justify-content: space-between; padding: 2px 24px 0 30px; }
+.statusbar--android .sb-left { padding: 0; justify-content: flex-start; }
+.statusbar--android .sb-time { font-family: "Google Sans", "Product Sans", Roboto, system-ui, sans-serif; font-size: 15px; font-weight: 500; letter-spacing: .1px; line-height: 20px; }
+.statusbar--android .sb-right { gap: 5px; padding: 0; }
+.statusbar--android .sb-wifi { width: 17px; height: 17px; }
+.statusbar--android .sb-cell { width: 15px; height: 15px; }
+.statusbar--android .sb-batt { width: 25px; height: 13px; margin-left: 2px; }
+.statusbar--android .sb-batt__body { fill: none; stroke: currentColor; stroke-opacity: .5; stroke-width: 1.3; }
+.statusbar--android .sb-batt__cap { fill-opacity: .5; }
+.punch { position: absolute; left: 50%; top: 12px; width: 15px; height: 15px; margin-left: -7.5px; border-radius: 50%;
+  background: radial-gradient(circle at 40% 38%, #232b3d 0 18%, #0a0d14 52%, #000 70%); box-shadow: 0 0 0 1.5px #000; }
+
+/* Полоска жестов Android — на всех экранах, цвет под фон */
+.home-indicator { position: absolute; z-index: 30; left: 50%; bottom: 9px; width: 108px; height: 4px; margin-left: -54px; border-radius: 2px;
+  background: rgba(255,255,255,.8); pointer-events: none; }
+body[data-theme="light"]:not(.is-video) .home-indicator { background: rgba(0,0,0,.72); }
+body.is-video .home-indicator { width: 108px; height: 4px; margin-left: -54px; bottom: 9px; border-radius: 2px; opacity: 1; background: rgba(255,255,255,.8); }
+body.sheet-open .home-indicator, body.desc-open .home-indicator { background: rgba(255,255,255,.8); }
+body[data-theme="light"].sheet-open .home-indicator, body[data-theme="light"].desc-open .home-indicator { background: rgba(0,0,0,.72); }
+
+/* =====================================================================
+   Мелкий серый текст в обёртке демо — контрастнее и не мельче 13 px (по мотивам вторичных цветов VKUI)
+   ===================================================================== */
+.panel__lead { color: #b1b4b9; }
+.panel__h-note, .cell__t small { color: #a3a6ab; font-size: 13.5px; }
+.scn__body span { color: #a3a6ab; font-size: 13.5px; }
+.panel__sub { color: #c3c6ca; }
+.panel__foot { color: #8f9297; font-size: 13px; }
+.panel .hint p { color: #d6d8db; }
+.panel__note { color: #a3a6ab; font-size: 13.5px; }
+.is-side .ds__head { color: rgba(255,255,255,.66); font-size: 13px; }
+body[data-theme="light"] .panel__lead, body[data-theme="light"] .scn__body span, body[data-theme="light"] .panel__h-note,
+body[data-theme="light"] .cell__t small, body[data-theme="light"] .panel__note { color: #5d6670 !important; }
+body[data-theme="light"] .panel__foot { color: #6d7885 !important; }
+body[data-theme="light"] .is-side .ds__head { color: rgba(0,0,0,.6); }

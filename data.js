@@ -16,14 +16,14 @@ window.DATA = {
       clip: 'media/podcast.mp4', poster: 'media/podcast.jpg',
       duration: 9100,          // 2:31:40
       stoppedAt: 4598,         // 1:16:38
-      thumb: { text: 'ПОЧЕМУ\nТЕСТ ВРАЛ?', img: 'media/podcast.jpg', accent: '#ffd84d' },
+      thumb: { text: 'Почему\nтест врал?', img: 'media/podcast.jpg', plate: '#FFD84D' },
       also: [
         { title: 'Продуктовый разговор #41: зачем продакту SQL', channel: 'Продуктовый разговор', duration: 7420, views: '890 тыс просмотров · 2 нед',
-          thumb: { img: 'media/thumbs/p_team.jpg', text: 'SQL\nДЛЯ ПРОДАКТА', accent: '#9fe3ff' } },
+          thumb: { img: 'media/thumbs/p_team.jpg', text: 'SQL для продакта', plate: '#7CC4FF' } },
         { title: 'Как приоритизировать бэклог: RICE, ICE и здравый смысл', channel: 'Школа продакта', duration: 2465, views: '312 тыс просмотров · 1 мес',
-          thumb: { img: 'media/thumbs/p_brainstorm.jpg', text: 'RICE\nИЛИ ICE?', accent: '#ffe066' } },
+          thumb: { img: 'media/thumbs/p_brainstorm.jpg' } },
         { title: 'Ошибки в A/B-тестах, которые совершают все', channel: 'Школа данных', duration: 1830, views: '208 тыс просмотров · 3 нед',
-          thumb: { img: 'media/thumbs/p_meeting.jpg', text: 'ТЕСТ\nВРЁТ?', accent: '#ff8f8f' } },
+          thumb: { img: 'media/thumbs/p_meeting.jpg', text: 'Тест врёт?' } },
         { title: 'Как провести интервью с пользователем и не подсказать ответ', channel: 'Продуктовый разговор', duration: 3120, views: '154 тыс просмотров · 2 мес',
           thumb: { img: 'media/thumbs/p_call.jpg' } }
       ],
@@ -64,16 +64,16 @@ window.DATA = {
       clip: 'media/cinema.mp4', poster: 'media/cinema.jpg',
       duration: 6500,          // 1:48:20
       stoppedAt: 2310,         // 38:30
-      thumb: { text: 'ОДИН\nДУБЛЬ', img: 'media/cinema.jpg', accent: '#ffd166' },
+      thumb: { text: 'Один дубль', img: 'media/cinema.jpg' },
       also: [
         { title: 'Почему кино снова снимают на плёнку', channel: 'Киноразбор', duration: 1540, views: '402 тыс просмотров · 1 мес',
-          thumb: { img: 'media/thumbs/c_film.jpg', text: 'ПЛЁНКА\nВЕРНУЛАСЬ', accent: '#ffd166' } },
+          thumb: { img: 'media/thumbs/c_film.jpg', text: 'Плёнка\nвернулась' } },
         { title: 'Как работает свет на съёмочной площадке', channel: 'Оператор на связи', duration: 2210, views: '96 тыс просмотров · 3 нед',
-          thumb: { img: 'media/thumbs/c_clap.jpg', text: 'СВЕТ\nРЕШАЕТ ВСЁ', accent: '#ffffff' } },
+          thumb: { img: 'media/thumbs/c_clap.jpg' } },
         { title: 'Почему мы плачем в кино: разбор с психологом', channel: 'Киноразбор', duration: 1760, views: '1,1 млн просмотров · 4 мес',
           thumb: { img: 'media/thumbs/c_audience.jpg' } },
         { title: 'Кинотеатры возвращаются? Смотрим на цифры проката', channel: 'Кино и цифры', duration: 1320, views: '188 тыс просмотров · 1 нед',
-          thumb: { img: 'media/thumbs/c_seats.jpg', text: 'КИНО\nЖИВО?', accent: '#ffb3c1' } }
+          thumb: { img: 'media/thumbs/c_seats.jpg', text: 'Кино живо?', plate: '#FFB3C1' } }
       ],
       chapters: [
         { t: 0,    title: 'Вступление' },
@@ -107,16 +107,16 @@ window.DATA = {
       clip: 'media/gaming.mp4', poster: 'media/gaming.jpg',
       duration: 4325,          // 1:12:05
       stoppedAt: 2601,         // 43:21
-      thumb: { text: 'ГДЕ РЕШИЛАСЬ\nИГРА?', img: 'media/gaming.jpg', accent: '#ffd7a8' },
+      thumb: { text: 'Где решилась\nигра?', img: 'media/gaming.jpg' },
       also: [
         { title: 'Лучшие камбэки турнира: подборка за сезон', channel: 'Дота-аналитика', duration: 1450, views: '640 тыс просмотров · 2 нед',
-          thumb: { img: 'media/thumbs/g_team.jpg', text: 'КАМБЭК\nГОДА', accent: '#ffd7a8' } },
+          thumb: { img: 'media/thumbs/g_team.jpg', text: 'Камбэк года' } },
         { title: 'Гайд для новичков: с чего начать в Dota 2', channel: 'Киберспорт без воды', duration: 2380, views: '275 тыс просмотров · 1 мес',
-          thumb: { img: 'media/thumbs/g_hands.jpg', text: 'С НУЛЯ\nЗА ВЕЧЕР', accent: '#b8ff9f' } },
+          thumb: { img: 'media/thumbs/g_hands.jpg' } },
         { title: 'Один день из жизни киберспортивной команды', channel: 'Киберспорт без воды', duration: 1910, views: '133 тыс просмотров · 3 нед',
           thumb: { img: 'media/thumbs/g_compete.jpg' } },
         { title: 'Ночной стрим: поднимаем рейтинг до утра', channel: 'Ночной стрим', duration: 14400, views: '58 тыс просмотров · 2д',
-          thumb: { img: 'media/thumbs/g_solo.jpg', text: 'ДО\nУТРА', accent: '#7fffd4' } }
+          thumb: { img: 'media/thumbs/g_solo.jpg', text: 'До утра' } }
       ],
       chapters: [
         { t: 0,    title: 'Вступление' },
@@ -151,36 +151,36 @@ window.DATA = {
   history: [
     { ref: 'v_42' },
     { id: 'h1', title: 'Как мы подняли retention на 15%: разбор продуктового кейса', channel: 'Продуктовый разговор', duration: 2840, position: 2840,
-      thumb: { img: 'media/thumbs/p_data.jpg', text: '+15%\nRETENTION', accent: '#7cf2b0' } },
+      thumb: { img: 'media/thumbs/p_data.jpg', text: '+15% retention', plate: '#7CF2B0' } },
     { ref: 'v_17' },
     { id: 'h2', title: 'Новый патч Dota 2: что изменилось для саппортов', channel: 'Дота-аналитика', duration: 1268, position: 1268,
-      thumb: { img: 'media/thumbs/g_keyboard.jpg', text: 'НОВЫЙ\nПАТЧ', accent: '#ffd7a8' } },
+      thumb: { img: 'media/thumbs/g_compete.jpg', text: 'Новый патч' } },
     { ref: 'v_31' },
     { id: 'h3', title: 'Интервью с основателем: как найти первую 1000 пользователей', channel: 'Продуктовый разговор', duration: 4210, position: 4210,
-      thumb: { img: 'media/thumbs/p_podcast2.jpg', text: 'ПЕРВАЯ\n1000', accent: '#ffe066' } },
+      thumb: { img: 'media/thumbs/p_podcast2.jpg', text: 'Первая 1000\nпользователей' } },
     { id: 'h4', title: 'Большой экран против стриминга: кто победит', channel: 'Кино и цифры', duration: 1690, position: 1690,
       thumb: { img: 'media/thumbs/c_lens.jpg' } },
     { id: 'h5', title: 'Как не тильтовать в рейтинговых играх: 5 советов', channel: 'Киберспорт без воды', duration: 1120, position: 1120,
-      thumb: { img: 'media/thumbs/g_tilt.jpg', text: 'БЕЗ\nТИЛЬТА', accent: '#ff9ecf' } },
+      thumb: { img: 'media/thumbs/g_tilt.jpg' } },
     { id: 'h6', title: 'История кинопроектора за 15 минут', channel: 'Киноразбор', duration: 905, position: 905,
       thumb: { img: 'media/thumbs/c_projector.jpg' } },
     { id: 'v_8', title: 'Обзор: лучшие смартфоны 2026 года', channel: 'Техно Обзор', duration: 1452, position: 1452,
-      thumb: { text: 'ТОП-5\n2026', from: '#2a2a2e', to: '#4d4d57', accent: '#7fd3ff' } }
+      thumb: { img: 'media/thumbs/c_lens.jpg', text: 'Топ-5\nсмартфонов', plate: '#7FD3FF' } }
   ],
 
   later: [
     { id: 'v_55', title: 'Стрим: собираем Telegram-бота на Python за вечер', channel: 'Код и кофе', duration: 11194, position: 0,
-      thumb: { text: 'БОТ\nЗА ВЕЧЕР', from: '#1f3f73', to: '#2c7dc9', accent: '#fff36b' } },
+      thumb: { img: 'media/thumbs/g_keyboard.jpg', text: 'Бот за вечер' } },
     { id: 'l2', title: 'Финал турнира по Dota 2: полная запись с комментариями', channel: 'Дота-аналитика', duration: 15320, position: 0,
-      thumb: { img: 'media/thumbs/g_team.jpg', text: 'ФИНАЛ\nЦЕЛИКОМ', accent: '#ffd7a8' } },
+      thumb: { img: 'media/thumbs/g_team.jpg' } },
     { id: 'l3', title: 'Итоги года в кино: что смотрели зрители', channel: 'Кино и цифры', duration: 3725, position: 0,
-      thumb: { img: 'media/thumbs/c_audience.jpg', text: 'ИТОГИ\nГОДА', accent: '#ffd166' } }
+      thumb: { img: 'media/thumbs/c_audience.jpg', text: 'Итоги года', plate: '#FFD166' } }
   ],
 
   also: [
     { title: 'Продуктовый разговор #41: зачем продакту SQL', channel: 'Продуктовый разговор', duration: 7420, views: '890 тыс просмотров',
-      thumb: { text: 'SQL\nДЛЯ ПРОДАКТА', from: '#14365e', to: '#355fa8', accent: '#9fe3ff' } },
+      thumb: { img: 'media/thumbs/p_team.jpg', text: 'SQL для продакта', plate: '#7CC4FF' } },
     { title: 'Как устроены рекомендации видео — объясняем на пальцах', channel: 'Код и кофе', duration: 2290, views: '214 тыс просмотров',
-      thumb: { text: 'КАК ТЕБЕ\nВСЁ ЭТО\nПОДОБРАЛИ', from: '#3b1d5e', to: '#7b3fa0', accent: '#ffd0f0' } }
+      thumb: { img: 'media/thumbs/p_brainstorm.jpg', text: 'Как работают\nрекомендации' } }
   ]
 };
