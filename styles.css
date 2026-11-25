@@ -1,0 +1,1043 @@
+/* =====================================================================
+   Стили прототипа. Порядок блоков важен: более поздние блоки уточняют
+   более ранние (так шли итерации дизайна), поэтому блоки не переставлять.
+   Блоки сверху вниз:
+     токены VKUI (тёмная тема) → страница и панель проверяющего → телефон-рамка →
+     экраны и навигация → «Моё», полка, карточки → экран видео, плеер, ряд действий →
+     плашка «Что было до X» → шторки (пересказ, «Описание», главы) → снекбар →
+     мобильная вёрстка → светлая тема → живой фон → переключатель версий →
+     статус-бар iOS → панель глав → шторка пересказа (финальный вид) →
+     панель проверяющего (финальный вид) → демо-курсор и окошко шагов → ИИ-знак VK
+   ПРОДУКТ: всё, что внутри .screen. ТОЛЬКО ДЕМО: .panel, .stage вне телефона,
+   .mode-switch, .theme-switch, .ghost, .demo-status, .bgfx, рамка .phone/.hw.
+   ===================================================================== */
+
+/* ==========================================================
+   Токены. Значения сняты со скриншотов приложения VK Видео (Android)
+   и совпадают с тёмной темой дизайн-системы VKUI.
+   ========================================================== */
+:root {
+  --bg: #19191A;              /* фон экранов (VKUI background_content dark) */
+  --bg-video: #0A0A0A;        /* фон страницы видео */
+  --surface: #222224;         /* карточки, комментарии */
+  --surface-2: #2E2E2E;       /* чипсы, вторичные кнопки */
+  --sheet: #1C1C1E;           /* шторки */
+  --separator: rgba(255,255,255,.08);
+  --text: #E1E3E6;            /* text_primary */
+  --text-2: #76787A;          /* text_secondary */
+  --text-tab: #797979;
+  --accent: #2688EB;          /* accent */
+  --accent-soft: rgba(38,136,235,.16);
+  --link: #71AAEB;
+  --white: #FFFFFF;
+  --black: #000000;
+
+  --ai-1: #4EAFFF;            /* ИИ-градиент VK (sparkles_circle_fill_ai_gradient): голубой → фиолетовый → розовый */
+  --ai-2: #B984ED;
+  --ai-3: #FF4B9C;
+
+  --r-s: 8px; --r-m: 12px; --r-l: 16px; --r-xl: 24px; --r-pill: 999px;
+  --font: -apple-system, system-ui, Roboto, "Helvetica Neue", Arial, sans-serif; /* как в вебе VK Видео */
+  --ease: cubic-bezier(.2,.8,.2,1);
+  --ease-sheet: cubic-bezier(.32,.72,0,1);
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; height: 100%; }
+body {
+  font-family: var(--font);
+  color: var(--text);
+  background: radial-gradient(1200px 700px at 70% 30%, #1d2433 0%, #0d0e11 60%) fixed, #0d0e11;
+  display: flex; min-height: 100vh; overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+svg { display: block; fill: currentColor; } /* у части иконок VK цвет не задан в файле */
+h1, h2, p { margin: 0; }
+
+/* ================= Панель проверяющего ================= */
+.panel { width: 380px; flex: none; height: 100vh; overflow-y: auto; padding: 40px 32px; border-right: 1px solid rgba(255,255,255,.06); background: rgba(10,11,14,.55); backdrop-filter: blur(10px); }
+.panel__badge { display: inline-block; font-size: 12px; letter-spacing: .02em; color: #b9c3d6; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.08); padding: 6px 10px; border-radius: var(--r-pill); }
+.panel__title { font-size: 28px; line-height: 1.15; font-weight: 700; margin-top: 18px; letter-spacing: -.01em; }
+.panel__lead { margin-top: 10px; font-size: 15px; line-height: 1.45; color: #a6adb8; }
+.panel__group { margin-top: 26px; }
+
+
+.panel__foot { margin-top: 26px; font-size: 12px; line-height: 1.5; color: #6c7380; }
+.panel__close { display: none; }
+
+.segmented { display: grid; grid-template-columns: 1fr 1fr; background: rgba(255,255,255,.06); border-radius: var(--r-m); padding: 4px; }
+.segmented button { padding: 9px 0; border-radius: 9px; font-size: 14px; font-weight: 600; color: #a6adb8; transition: background .25s var(--ease), color .25s; }
+.segmented button.is-on { background: var(--white); color: #111; }
+
+.scenarios { display: grid; gap: 8px; }
+.scenarios button { text-align: left; padding: 11px 14px; border-radius: var(--r-m); background: rgba(255,255,255,.04); border: 1px solid transparent; transition: border-color .2s, background .2s; }
+.scenarios button b { display: block; font-size: 14px; font-weight: 600; }
+.scenarios button span { display: block; font-size: 12.5px; color: #8a92a0; margin-top: 2px; line-height: 1.35; }
+.scenarios button.is-on { border-color: var(--accent); background: var(--accent-soft); }
+body[data-mode="before"] :is(#scenarioGroup, #styleGroup) { opacity: .35; pointer-events: none; }
+.panel__note { margin: 10px 0 0; font-size: 12.5px; line-height: 1.45; color: #8a92a0; }
+.panel__note b { color: #c4cad3; font-weight: 600; }
+
+
+
+
+.events { list-style: none; margin: 0; padding: 0; font: 12px/1.45 ui-monospace, SFMono-Regular, Menlo, monospace; max-height: 170px; overflow: auto; }
+.events li { padding: 6px 8px; border-radius: 6px; background: rgba(255,255,255,.04); margin-bottom: 4px; color: #b7c0cc; animation: evIn .35s var(--ease); }
+.events li b { color: #8fc1ff; font-weight: 600; }
+.events__empty { color: #6c7380 !important; background: none !important; font-family: var(--font); }
+@keyframes evIn { from { opacity: 0; transform: translateY(-4px); } }
+
+/* ================= Сцена и телефон ================= */
+.stage { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; min-width: 0; }
+/* Рамка: iPhone 17 Pro (экран 402×874 pt, Dynamic Island, корпус Deep Blue) */
+.phone {
+  --bezel: 12px;
+  position: relative; flex: none; width: calc(402px + var(--bezel) * 2); height: calc(874px + var(--bezel) * 2);
+  border-radius: 68px; padding: var(--bezel); transform-origin: center center;
+  background: linear-gradient(150deg, #4a5d7e 0%, #24324b 22%, #1a2335 50%, #2b3b58 78%, #55698c 100%);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.18), inset 0 0 0 3px #0f1622, 0 0 0 1px #0b0f17, 0 50px 120px rgba(0,0,0,.6), 0 12px 30px rgba(0,0,0,.4);
+}
+.phone::before { content: ""; position: absolute; inset: 4px; border-radius: 64px; background: #000; }
+.hw { position: absolute; width: 4px; border-radius: 2px; background: linear-gradient(90deg, #1b2537, #4b5f80 60%, #2a3851); }
+.hw--action  { left: -3px; top: 168px; height: 34px; }
+.hw--vol-up  { left: -3px; top: 230px; height: 64px; }
+.hw--vol-down{ left: -3px; top: 306px; height: 64px; }
+.hw--power   { right: -3px; top: 250px; height: 104px; background: linear-gradient(270deg, #1b2537, #4b5f80 60%, #2a3851); }
+.hw--camera  { right: -2px; top: 520px; height: 72px; width: 3px; background: linear-gradient(270deg, #0f1622, #2f3e5a); }
+.screen { --safe-top: 54px; --safe-bottom: 34px; position: relative; width: 402px; height: 874px; border-radius: 56px; overflow: hidden; background: var(--bg); isolation: isolate; }
+.concept-pill { display: none; }
+
+/* Статус-бар iOS и Dynamic Island */
+body.is-video .home-indicator { position: absolute; z-index: 30; left: 50%; bottom: 8px; width: 140px; height: 5px; margin-left: -70px; border-radius: 3px; background: #fff; opacity: .92; pointer-events: none; }
+
+/* ================= Экраны ================= */
+/* Экраны — слои, как в нативном приложении: новый экран наезжает поверх, нижний остаётся непрозрачным
+   и слегка затемняется. Ничего не растворяется друг в друге, поэтому нет «просвечивания». */
+.view { position: absolute; inset: var(--safe-top) 0 0 0; display: flex; flex-direction: column; background: var(--bg);
+  visibility: hidden; pointer-events: none;
+  transition: transform .46s var(--ease-sheet), visibility 0s .46s; }
+.view.is-active { visibility: visible; transition: transform .46s var(--ease-sheet), visibility 0s; }
+/* нижний экран виден только пока верхний наезжает, потом прячется — иначе на субпикселях масштабированной рамки он выглядывает по краю */
+.view.is-under { visibility: hidden; transition: transform .46s var(--ease-sheet), visibility 0s .46s; }
+.view.is-active { pointer-events: auto; }
+.view::after { content: ""; position: absolute; inset: 0; z-index: 50; background: #000; opacity: 0; pointer-events: none; transition: opacity .46s var(--ease-sheet); }
+.view.is-under::after { opacity: .4; }
+.view--moe { z-index: 1; }
+.view--moe.is-pushed { transform: translateX(-26%); }
+.view--list { z-index: 2; left: -1px; right: -1px; transform: translateX(100%); box-shadow: -16px 0 40px rgba(0,0,0,.35); }
+.view--list.is-active, .view--list.is-under { transform: none; }
+.view--video { z-index: 3; left: -1px; right: -1px; background: var(--bg-video); transform: translateY(100%); }
+.view--video.is-active { transform: none; }
+.scroll { flex: 1; overflow-y: auto; overflow-x: hidden; scrollbar-width: none; }
+.scroll::-webkit-scrollbar { display: none; }
+.scroll__pad { height: 24px; }
+.view--video .scroll__pad { height: calc(24px + var(--safe-bottom)); }
+
+/* Шапка «Моё» */
+.profile { display: flex; align-items: center; gap: 12px; padding: 16px 16px 6px; }
+.profile__text { flex: 1; min-width: 0; }
+.profile__name { font-size: 19px; font-weight: 600; }
+.profile__sub { font-size: 15px; color: var(--text-2); margin-top: 1px; }
+.avatar { flex: none; border-radius: 50%; display: grid; place-items: center; font-weight: 700; color: #fff; }
+.avatar--me { width: 40px; height: 40px; font-size: 15px; background: #2a2a2c url('media/avatars/me.jpg') center/cover; }
+.avatar--ch { width: 36px; height: 36px; font-size: 13px; }
+.avatar--xs { width: 26px; height: 26px; font-size: 11px; background: #3a4a5e; }
+.icon-btn { width: 40px; height: 40px; display: grid; place-items: center; border-radius: 50%; color: var(--text); }
+.icon-btn svg { width: 26px; height: 26px; }
+
+
+
+.chips { display: flex; gap: 8px; padding: 10px 16px 4px; overflow-x: auto; scrollbar-width: none; }
+.chips::-webkit-scrollbar { display: none; }
+.chip { flex: none; height: 34px; padding: 0 14px; border-radius: var(--r-pill); background: var(--surface-2); font-size: 15px; font-weight: 600; white-space: nowrap; }
+
+/* Плашка «Отключить рекламу» — повторяет промо Премиума из приложения (тёмно-синее «стекло» и хромированный логотип) */
+.promo { position: relative; overflow: hidden; margin: 16px 16px 4px; min-height: 77px; border-radius: 12px; display: flex; align-items: center; gap: 15px; padding: 12px 12px 12px 13px;
+  background:
+    radial-gradient(70% 150% at 42% 75%, rgba(66, 98, 150, .55) 0%, rgba(66, 98, 150, 0) 70%),
+    linear-gradient(90deg, #03235a 0%, #0b2858 55%, #082350 100%); }
+.promo::before, .promo::after { content: ""; position: absolute; top: -20%; bottom: -20%; transform: skewX(-24deg); pointer-events: none; }
+.promo::before { left: 55%; width: 26%; border-left: 1px solid rgba(170, 196, 236, .22);
+  background: linear-gradient(90deg, rgba(150, 178, 224, .16), rgba(150, 178, 224, .06)); }
+.promo::after { left: 78%; width: 40%; border-left: 1px solid rgba(170, 196, 236, .32);
+  background: linear-gradient(90deg, rgba(150, 178, 224, .10) 0 40%, rgba(170, 196, 236, .30) 40% calc(40% + 1px), rgba(150, 178, 224, .05) calc(40% + 1px)); }
+.promo__logo { position: relative; z-index: 1; width: 53px; height: 53px; flex: none; object-fit: contain; } /* логотип вырезан из скриншота приложения */
+.promo__text { position: relative; z-index: 1; flex: 1; min-width: 0; }
+.promo__title { font-size: 17.5px; font-weight: 600; color: #fff; letter-spacing: -.005em; }
+.promo__sub { font-size: 16px; color: #a8bcd7; margin-top: 3px; }
+.promo__close { position: relative; z-index: 1; transition: background .2s; align-self: flex-start; margin-top: 1px; width: 27px; height: 27px; flex: none; border-radius: 50%; background: rgba(255, 255, 255, .2); display: grid; place-items: center; }
+.promo__close svg { width: 15px; height: 15px; color: rgba(255, 255, 255, .55); }
+
+/* Полки */
+.shelf { margin-top: 22px; }
+.shelf__head { display: flex; align-items: baseline; justify-content: space-between; padding: 0 16px; margin-bottom: 10px; }
+.shelf__title { font-size: 19px; font-weight: 700; letter-spacing: -.005em; }
+.shelf__more { font-size: 15px; font-weight: 600; color: var(--text); }
+.shelf__row { display: flex; gap: 12px; padding: 6px 16px; margin: -6px 0; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; scroll-padding: 0 16px; }
+.shelf__row::-webkit-scrollbar { display: none; }
+
+.card { flex: none; width: 166px; text-align: left; scroll-snap-align: start; border-radius: 12px; }
+.card__title { font-size: 15.5px; font-weight: 600; line-height: 1.28; margin-top: 8px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.card__ch { font-size: 14px; color: var(--text-2); margin-top: 3px; display: flex; align-items: center; gap: 4px; white-space: nowrap; overflow: hidden; }
+.card__ch span { overflow: hidden; text-overflow: ellipsis; }
+.verified { width: 14px; height: 14px; color: var(--accent); flex: none; }
+
+.thumb { position: relative; aspect-ratio: 16/9; border-radius: 10px; overflow: hidden; background: #333; }
+.thumb__art { position: absolute; inset: 0; display: flex; align-items: center; padding: 0 10%; }
+.thumb__txt { font-weight: 900; font-stretch: condensed; text-transform: uppercase; line-height: .95; letter-spacing: -.01em; white-space: pre-line; text-shadow: 0 2px 0 rgba(0,0,0,.35), 0 0 24px rgba(0,0,0,.35); }
+.thumb__art--img::before { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(0,0,0,.72) 0%, rgba(0,0,0,.35) 55%, transparent 85%); }
+.thumb__art--img .thumb__txt { position: relative; }
+.thumb__face { position: absolute; right: -6%; bottom: -12%; width: 46%; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle at 50% 38%, rgba(255,255,255,.55) 0 18%, rgba(255,255,255,.18) 19% 44%, transparent 45%); filter: blur(.3px); opacity: .7; }
+.thumb__dur { position: absolute; right: 6px; bottom: 7px; font-size: 13px; font-weight: 700; padding: 2px 5px; border-radius: 5px; background: rgba(0,0,0,.6); }
+.thumb__prog { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: rgba(255,255,255,.22); }
+.thumb__prog i { display: block; height: 100%; background: var(--accent); }
+
+/* Продолжить просмотр — новые карточки */
+.shelf--continue .card { width: 244px; }
+.card--continue .thumb { border-radius: 12px; }
+.card--continue .thumb__prog { height: 4px; }
+.thumb__left { position: absolute; left: 8px; bottom: 10px; font-size: 12.5px; font-weight: 600; padding: 3px 7px; border-radius: 6px; background: rgba(0,0,0,.62); backdrop-filter: blur(6px); }
+.card__stop { margin-top: 5px; font-size: 13.5px; color: var(--text-2); display: flex; gap: 5px; align-items: center; white-space: nowrap; overflow: hidden; }
+.card__stop svg { width: 15px; height: 15px; flex: none; color: var(--text-2); }
+.card__stop span { overflow: hidden; text-overflow: ellipsis; }
+.ai-tag { position: absolute; top: 8px; left: 8px; display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 700; padding: 4px 8px 4px 6px; border-radius: var(--r-pill);
+  background: rgba(10,12,20,.62); backdrop-filter: blur(8px); color: #fff; }
+.ai-tag svg { width: 13px; height: 13px; color: var(--ai-1); }
+
+@keyframes pulse { 50% { box-shadow: 0 0 0 3px var(--accent); } }
+
+.only-after { display: none; }
+body[data-mode="after"] .only-after { display: block; }
+body[data-mode="after"] .action--recap.only-after { display: flex; }
+.action--recap.is-hidden { display: none !important; }
+
+/* Экран «Продолжить просмотр» — как список «История просмотра» в приложении */
+.listhead { display: flex; align-items: center; gap: 6px; padding: 8px 10px 6px 6px; }
+.listhead .icon-btn svg { width: 28px; height: 28px; }
+.listhead__title { font-size: 23px; font-weight: 700; letter-spacing: -.01em; }
+.listhead__title { flex: 1; }
+.listhead__trash { color: var(--accent); }
+.listhead__trash svg { width: 30px; height: 30px; }
+.list__search { display: flex; align-items: center; gap: 8px; height: 40px; margin: 4px 16px 16px; padding: 0 12px; border-radius: 10px; background: #363739; color: #8d9196; font-size: 17px; }
+.list__search svg { width: 22px; height: 22px; }
+[hidden] { display: none !important; }
+.list__hint { display: flex; gap: 8px; align-items: flex-start; margin: 4px 16px 16px; padding: 10px 12px; border-radius: var(--r-m); background: var(--surface); font-size: 13.5px; line-height: 1.35; color: #aeb3ba; }
+.list__hint svg { width: 16px; height: 16px; flex: none; margin-top: 1px; color: var(--ai-1); }
+.row { display: flex; gap: 12px; width: 100%; padding: 0 8px 0 16px; margin-bottom: 16px; text-align: left; border-radius: 12px; }
+.row .thumb { width: 166px; flex: none; }
+.row__body { flex: 1; min-width: 0; }
+.row__title { font-size: 15.5px; font-weight: 600; line-height: 1.28; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.row .card__stop { margin-top: 3px; font-size: 13px; }
+.row__ai { display: inline-flex; align-items: center; gap: 4px; margin-top: 6px; font-size: 12px; font-weight: 700; padding: 3px 8px 3px 6px; border-radius: var(--r-pill); background: var(--accent-soft); color: var(--link); }
+.row__ai svg { width: 12px; height: 12px; }
+.row__more { width: 28px; height: 28px; flex: none; display: grid; place-items: center; color: var(--text); margin-top: 2px; }
+.row__more svg { width: 22px; height: 22px; }
+
+/* Таббар */
+.tabbar { flex: none; display: grid; grid-template-columns: repeat(5,1fr); height: calc(58px + var(--safe-bottom)); padding-bottom: var(--safe-bottom); background: var(--bg); border-top: 1px solid rgba(255,255,255,.04); }
+.tab { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; color: var(--text-tab); font-size: 12px; font-weight: 500; }
+.tab svg { width: 27px; height: 27px; }
+.tab.is-active { color: #EFEFEF; }
+
+/* ================= Плеер ================= */
+.player { position: relative; flex: none; aspect-ratio: 16/9; background: #000; user-select: none; }
+.player__frame { position: absolute; inset: 0; overflow: hidden; }
+.scene { position: absolute; inset: -4px; filter: blur(1.2px); background: radial-gradient(120% 90% at 50% 10%, #18307a 0%, #0a1650 45%, #060b2c 100%); }
+.scene::before { content: ""; position: absolute; inset: 0; background-image: radial-gradient(1.2px 1.2px at 20% 30%, rgba(255,255,255,.5), transparent), radial-gradient(1px 1px at 70% 20%, rgba(255,255,255,.4), transparent), radial-gradient(1px 1px at 85% 55%, rgba(255,255,255,.35), transparent), radial-gradient(1.4px 1.4px at 35% 70%, rgba(255,255,255,.3), transparent); }
+.scene__glow { position: absolute; left: 30%; top: 0; width: 40%; height: 70%; background: radial-gradient(closest-side, rgba(120,160,255,.35), transparent); animation: breathe 6s ease-in-out infinite; }
+.scene__desk { position: absolute; left: -10%; right: -10%; bottom: -30%; height: 55%; border-radius: 50%; background: radial-gradient(closest-side, #e8eef8, #b9c4d6 70%, #8693a8); opacity: .9; }
+.scene__p { position: absolute; bottom: 12%; width: 22%; aspect-ratio: .78; border-radius: 48% 48% 12% 12% / 40% 40% 12% 12%; background: linear-gradient(#2b2f3a, #12151c); }
+.scene__p::before { content: ""; position: absolute; left: 28%; top: -34%; width: 44%; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle at 45% 40%, #e3b9a0, #b98670 70%); }
+.scene__p--a { left: 16%; animation: sway 5s ease-in-out infinite; }
+.scene__p--b { right: 16%; animation: sway 6s ease-in-out infinite reverse; background: linear-gradient(#5a4a3e, #2a211b); }
+@keyframes breathe { 50% { opacity: .6; transform: scale(1.06); } }
+@keyframes sway { 50% { transform: translateY(-2px) rotate(-1deg); } }
+.player.is-paused .scene__glow, .player.is-paused .scene__p { animation-play-state: paused; }
+.player__video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; background: transparent; }
+
+.player__ui { position: absolute; inset: 0; background: rgba(0,0,0,.38); opacity: 1; transition: opacity .25s; }
+.player.is-clean .player__ui { opacity: 0; pointer-events: none; }
+.player__back { position: absolute; left: 6px; top: 6px; width: 40px; height: 40px; display: grid; place-items: center; color: #fff; }
+.player__back svg { width: 24px; height: 24px; }
+.player__center { position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-58%); display: flex; justify-content: center; align-items: center; }
+.player__play { width: 64px; height: 64px; display: grid; place-items: center; color: #fff; }
+.player__play svg { width: 44px; height: 44px; }
+.player__next { position: absolute; left: calc(50% + 72px); width: 48px; height: 48px; border-radius: 50%; background: rgba(0,0,0,.35); display: grid; place-items: center; color: #fff; }
+.player__next svg { width: 24px; height: 24px; }
+.player__bottom { position: absolute; left: 14px; right: 10px; bottom: 18px; }
+.player__meta { display: flex; align-items: center; gap: 8px; font-size: 13px; color: rgba(255,255,255,.7); }
+.player__time b { color: #fff; font-weight: 600; }
+.player__chapter { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #fff; font-weight: 500; }
+.player__chapter::before { content: "· "; color: rgba(255,255,255,.6); }
+.player__chapter::after { content: " ›"; color: rgba(255,255,255,.6); }
+.player__icons { display: flex; gap: 14px; color: #fff; }
+.player__icons svg { width: 20px; height: 20px; }
+
+/* Полоса прогресса с главами */
+.bar { position: absolute; left: 12px; right: 12px; bottom: 4px; height: 16px; cursor: pointer; touch-action: none; }
+.bar__track { position: absolute; left: 0; right: 0; top: 6px; height: 4px; display: flex; gap: 3px; }
+.seg { position: relative; height: 100%; border-radius: 2px; background: rgba(255,255,255,.28); overflow: hidden; transition: transform .2s var(--ease), background .2s; }
+.seg i { position: absolute; inset: 0 auto 0 0; background: #5D9EEA; border-radius: 2px; }
+.seg.is-hl { transform: scaleY(2); background: rgba(255,255,255,.5); }
+.seg.is-hl i { background: linear-gradient(90deg, var(--ai-1), var(--ai-2), var(--ai-3)); }
+.bar__thumb { position: absolute; top: 1px; width: 14px; height: 14px; margin-left: -7px; border-radius: 50%; background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,.4); transition: transform .2s; }
+.player.is-clean .bar__thumb { transform: scale(0); }
+.player.is-clean .bar { bottom: 0; }
+.player.is-clean .bar__track { top: 12px; height: 3px; }
+.bar.is-anim .bar__thumb { transition: left .7s var(--ease-sheet); }
+.bar__tip { position: absolute; bottom: 22px; transform: translateX(-50%); font-size: 12.5px; font-weight: 600; padding: 4px 8px; border-radius: 8px; background: rgba(0,0,0,.75); white-space: nowrap; opacity: 0; transition: opacity .2s; pointer-events: none; }
+.bar__tip.is-on { opacity: 1; }
+
+/* Под плеером */
+.vbody { position: relative; flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.vinfo { padding: 14px 16px 4px; }
+.vinfo__title { font-size: 17px; font-weight: 600; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.vinfo__meta { display: block; width: 100%; text-align: left; font-size: 14px; color: var(--text-2); margin-top: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.vinfo__meta b { color: var(--text); font-weight: 600; }
+.channel { display: flex; align-items: center; gap: 10px; padding: 14px 16px 6px; }
+.channel__text { flex: 1; min-width: 0; }
+.channel__name { display: flex; align-items: center; gap: 4px; font-size: 16px; font-weight: 500; min-width: 0; }
+.channel__name span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.channel__subs { font-size: 14px; color: var(--text-2); }
+.btn { height: 36px; padding: 0 16px; border-radius: var(--r-pill); font-size: 15px; font-weight: 600; transition: transform .12s, opacity .2s; }
+.btn:active { transform: scale(.97); }
+.btn--white { background: var(--white); color: #000; }
+
+.btn--l { height: 46px; width: 100%; font-size: 16px; border-radius: var(--r-m); }
+.actions { display: flex; align-items: center; gap: 0; padding: 6px 6px; }
+.action { height: 44px; min-width: 40px; padding: 0 7px; display: flex; align-items: center; gap: 6px; font-size: 15px; font-weight: 600; }
+.action svg { width: 24px; height: 24px; flex: none; }
+.actions__spacer { flex: 1; }
+.comments { margin: 4px 16px 0; padding: 12px 14px; border-radius: var(--r-m); background: var(--surface); }
+.comments__head { font-size: 15px; font-weight: 600; }
+.comments__head span { color: var(--text-2); font-weight: 500; }
+.comments__row { display: flex; gap: 10px; margin-top: 8px; align-items: flex-start; }
+.comments__row p { font-size: 14px; line-height: 1.35; color: #c9ccd1; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.also { margin-top: 20px; }
+.also__title { font-size: 19px; font-weight: 700; padding: 0 16px; margin-bottom: 12px; }
+.also__item { margin-bottom: 18px; }
+.also__item .thumb { border-radius: 0; }
+.also__row { display: flex; gap: 10px; padding: 10px 16px 0; }
+.also__row .avatar { width: 36px; height: 36px; font-size: 12px; }
+.also__info { flex: 1; min-width: 0; }
+.also__t { font-size: 15.5px; font-weight: 600; line-height: 1.3; }
+.also__m { font-size: 13.5px; color: var(--text-2); margin-top: 2px; }
+
+/* ================= Неблокирующая плашка пересказа =================
+   Появление: место под плашкой раскрывается, затем карточка проявляется сверху вниз.
+   Исчезновение: карточка гаснет и чуть уменьшается, потом место схлопывается,
+   а на его месте проявляется кнопка «Что было до…». Таймер — кольцо вокруг крестика. */
+.peek { height: 0; overflow: hidden; contain: layout paint; }
+.peek__inner { padding-bottom: 1px; }
+/* карточка в том же стиле, что «Комментарии»: спокойная поверхность VK, без градиентной рамки */
+.peek__card { position: relative; margin: 12px 16px 2px; border-radius: 12px; background: var(--surface);
+  opacity: 0; transform: translateY(-8px) scale(.985); transform-origin: 50% 0;
+  transition: opacity .3s ease, transform .45s var(--ease-sheet); }
+.peek.is-on .peek__card { opacity: 1; transform: none; transition-delay: .1s; }
+.peek.is-leaving .peek__card { opacity: 0; transform: scale(.97); transition: opacity .2s ease, transform .25s ease; transition-delay: 0s; }
+.peek__main { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 48px; padding: 8px 50px 8px 14px; text-align: left; border-radius: 12px; }
+.peek__main:active { background: rgba(255,255,255,.04); }
+.peek__icon { flex: none; display: grid; place-items: center; }
+.peek__icon svg { width: 20px; height: 20px; color: var(--ai-1); }
+.peek__text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.peek__text b { font-size: 15.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.peek__text span { font-size: 13.5px; color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.peek__chev { width: 18px; height: 18px; flex: none; color: var(--text-2); }
+.peek__close { position: absolute; top: 50%; right: 8px; width: 32px; height: 32px; margin-top: -16px; display: grid; place-items: center; color: #8d9196; }
+.peek__close > svg { grid-area: 1 / 1; }
+.peek__x { width: 14px; height: 14px; }
+.peek__ring { width: 32px; height: 32px; transform: rotate(-90deg); }
+.peek__ring circle { fill: none; stroke-width: 1.6; }
+.peek__ring-track { stroke: rgba(255,255,255,.08); }
+.peek__ring-fill { stroke: rgba(225,227,230,.45); stroke-linecap: round; stroke-dasharray: 87.97; stroke-dashoffset: 0; }
+.peek.is-on .peek__ring-fill { animation: ringDown 8s linear forwards; }
+@keyframes ringDown { to { stroke-dashoffset: 87.97; } }
+/* кнопка «Пересказ» в ряду действий */
+/* кнопка «Пересказ» — как соседние действия: контурная иконка из библиотеки VK, тот же цвет и размер, та же подпись.
+   Голубой цвет ИИ появляется только на миг, когда в неё «прилетает» свернувшаяся плашка. */
+.action--recap { gap: 0; padding: 0 7px; border-radius: var(--r-pill); font-size: 15px; font-weight: 600; }
+/* по умолчанию — только иконка, как у соседей; подпись раскрывается, когда в кнопку прилетает плашка */
+.action__label { display: inline-block; max-width: 0; opacity: 0; overflow: hidden; white-space: nowrap;
+  transition: max-width .45s var(--ease-sheet), opacity .25s ease, margin-left .45s var(--ease-sheet); }
+.action--recap.is-labeled .action__label { max-width: 90px; opacity: 1; margin-left: 6px; }
+.action--recap svg { width: 24px; height: 24px; color: currentColor; transition: color .3s; }
+.action--recap.is-arrive { animation: recapArrive .9s var(--ease-sheet); }
+.action--recap.is-arrive svg { animation: recapIcon .9s var(--ease-sheet); }
+@keyframes recapArrive {
+  0%   { background-color: rgba(90,168,255,0); transform: scale(1); }
+  25%  { background-color: rgba(90,168,255,.16); transform: scale(1.05); }
+  100% { background-color: rgba(90,168,255,0); transform: scale(1); }
+}
+@keyframes recapIcon { 0%, 45% { color: var(--ai-1); } }
+.fly { position: absolute; left: -9px; top: -9px; z-index: 25; width: 18px; height: 18px; color: var(--ai-1); pointer-events: none; filter: drop-shadow(0 0 6px rgba(90,168,255,.8)); }
+.fly svg { width: 18px; height: 18px; }
+
+/* ================= Шторка «Описание» (как в приложении) ================= */
+.sheet--desc { top: 0; max-height: none; z-index: 7; padding-bottom: 0; box-shadow: none; border-radius: 18px 18px 0 0; background: #1C1C1E; }
+.sheet--desc .sheet__head { padding: 2px 0 6px; }
+.desc__title { font-size: 24px; font-weight: 700; }
+.desc__close svg { width: 28px; height: 28px; }
+.desc__body { flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: none; margin: 0 -16px; padding: 4px 16px calc(64px + var(--safe-bottom)); }
+.desc__body::-webkit-scrollbar { display: none; }
+.desc__recap { margin: 0 0 18px; padding: 12px 14px 12px; border-radius: 14px;
+  background: linear-gradient(#232326, #232326) padding-box, linear-gradient(100deg, rgba(90,168,255,.6), rgba(167,123,255,.6)) border-box; border: 1px solid transparent; }
+.desc__recap-title { font-size: 15.5px; font-weight: 600; margin: 8px 0 6px; }
+.desc__recap-list .desc__tc { font-size: 15px; }
+.desc__recap-more { margin-top: 10px; height: 36px; padding: 0 14px; border-radius: var(--r-pill); background: var(--white); color: #000; font-size: 14.5px; font-weight: 600; }
+.desc__stats { font-size: 14px; color: var(--text-2); margin-bottom: 12px; }
+.desc__text { font-size: 16.5px; line-height: 1.42; color: var(--text); margin: 0 0 16px; }
+.desc__tcs { display: flex; flex-direction: column; }
+.desc__tc { text-align: left; font-size: 16.5px; line-height: 1.42; padding: 1px 0; color: var(--text); }
+.desc__tc span { color: var(--link); }
+
+/* ================= Шторка пересказа ================= */
+.sheet-scrim { position: absolute; inset: 0; background: rgba(0,0,0,.5); opacity: 0; pointer-events: none; transition: opacity .3s; z-index: 5; }
+.sheet-scrim.is-on { opacity: 1; pointer-events: auto; }
+.sheet { position: absolute; left: 0; right: 0; top: 0; bottom: -40px; z-index: 6; display: flex; flex-direction: column; overflow: hidden;
+  background: var(--sheet); border-radius: var(--r-xl) var(--r-xl) 0 0; padding: 6px 16px calc(50px + var(--safe-bottom)); /* шторка уходит на 40px ниже края экрана — снизу ничего не просвечивает даже в конце анимации */
+  transform: translateY(102%); transition: transform .5s var(--ease-sheet), box-shadow .5s; box-shadow: none; }
+.sheet.is-on { box-shadow: 0 -12px 40px rgba(0,0,0,.45); }
+.sheet::-webkit-scrollbar { display: none; }
+.sheet.is-on { transform: none; }
+.sheet.is-dragging { transition: none; }
+.sheet__handle { width: 40px; height: 4px; border-radius: 2px; background: #5E5E5E; margin: 4px auto 10px; cursor: grab; }
+.sheet__head { display: flex; align-items: center; justify-content: space-between; }
+
+
+.sheet__title { font-size: 22px; font-weight: 700; margin-top: 10px; letter-spacing: -.01em; }
+.accent { color: var(--link); }
+.sheet__sub { font-size: 15px; color: var(--text-2); margin-top: 4px; }
+
+.sheet__handle, .sheet__head, .sheet__title, .sheet__sub, .sheet__buttons, .sheet__foot { flex: none; }
+.sheet__body { margin: 10px -16px 0; padding: 0 16px 4px; position: relative; flex: 1 1 auto; min-height: 0; overflow-y: auto; scrollbar-width: none;
+  -webkit-mask-image: linear-gradient(#000 calc(100% - 18px), transparent); mask-image: linear-gradient(#000 calc(100% - 18px), transparent); }
+.sheet__body::-webkit-scrollbar { display: none; }
+.recap { list-style: none; margin: 0; padding: 0; position: relative; }
+.recap::before { content: ""; position: absolute; left: 7px; top: 18px; bottom: 30px; width: 2px; border-radius: 1px; background: linear-gradient(var(--ai-1), var(--ai-2)); opacity: .35; }
+.recap__item { position: relative; display: block; width: 100%; text-align: left; padding: 7px 8px 7px 28px; border-radius: var(--r-m); transition: background .2s;
+  opacity: 0; transform: translateY(8px); animation: itemIn .45s var(--ease) forwards; }
+.recap__item:hover, .recap__item:focus-visible { background: rgba(255,255,255,.05); outline: none; }
+.recap__item::before { content: ""; position: absolute; left: 3px; top: 15px; width: 10px; height: 10px; border-radius: 50%; background: var(--sheet); box-shadow: inset 0 0 0 2px var(--ai-1); }
+.recap__top { display: flex; align-items: center; gap: 8px; }
+.recap__tc { font-size: 13px; font-weight: 700; color: var(--link); background: var(--accent-soft); padding: 2px 7px; border-radius: 6px; font-variant-numeric: tabular-nums; }
+.recap__title { font-size: 15.5px; font-weight: 600; }
+.recap__text { font-size: 14px; line-height: 1.36; color: #b4b8bf; margin-top: 3px; }
+.recap__item--now::before { background: var(--white); box-shadow: 0 0 0 4px rgba(255,255,255,.15); }
+.recap__item--now .recap__tc { background: var(--white); color: #000; }
+.recap__item--now .recap__text { color: var(--text-2); }
+@keyframes itemIn { to { opacity: 1; transform: none; } }
+
+.skeleton { padding: 4px 0 6px; transition: opacity .18s ease, transform .18s ease; }
+.skeleton.is-out { opacity: 0; transform: translateY(-4px); }
+.skeleton__status { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--text-2); margin-bottom: 14px; }
+.skeleton__status svg { width: 18px; height: 18px; color: var(--ai-1); animation: spin 1.6s linear infinite; }
+.skeleton__row { height: 14px; border-radius: 7px; margin: 9px 0 0 28px; background: linear-gradient(90deg, #2a2a2d 0%, #3a3a3f 40%, #2a2a2d 80%); background-size: 200% 100%; animation: shimmer 1.2s linear infinite; }
+.skeleton__row.w1 { width: 42%; height: 16px; margin-top: 18px; } .skeleton__row.w2 { width: 86%; } .skeleton__row.w3 { width: 64%; }
+@keyframes shimmer { to { background-position: -200% 0; } }
+@keyframes spin { to { transform: rotate(360deg) scale(1); } 50% { transform: rotate(180deg) scale(.8); } }
+
+.sheet__buttons { display: grid; gap: 8px; margin-top: 14px; }
+.sheet__foot { display: flex; align-items: center; gap: 12px; margin-top: 12px; font-size: 12.5px; line-height: 1.35; color: var(--text-2); }
+.feedback { display: flex; gap: 4px; flex: none; }
+.feedback button { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: var(--surface-2); color: #aeb3ba; transition: background .2s, color .2s; }
+.feedback button svg { width: 18px; height: 18px; }
+.feedback button.is-on { background: var(--accent); color: #fff; }
+
+/* Снекбар */
+.snackbar { position: absolute; z-index: 20; left: 12px; right: 12px; bottom: calc(70px + var(--safe-bottom)); min-height: 48px; display: flex; align-items: center; gap: 12px; padding: 0 8px 0 16px; border-radius: var(--r-m);
+  background: #2C2D2E; box-shadow: 0 8px 24px rgba(0,0,0,.4); font-size: 15px; transform: translateY(20px); opacity: 0; pointer-events: none; transition: transform .35s var(--ease), opacity .25s; }
+body.is-video .snackbar { bottom: calc(12px + var(--safe-bottom)); }
+.snackbar.is-on { transform: none; opacity: 1; pointer-events: auto; }
+.snackbar span { flex: 1; }
+.snackbar button { color: var(--link); font-weight: 600; padding: 10px 8px; }
+.snackbar button:empty { display: none; }
+
+/* ================= Мобильный режим: прототип на весь экран ================= */
+/* ================= Подсказки для проверяющего ================= */
+.screen, .screen button { cursor: default; }
+.screen :is(#chapterLabel, .promo__close, #vMetaBtn, .desc__tc, #descClose, #descRecapMore, #peekCard, #peekClose, .card.is-live, .row.is-live, #continueAll, #historyAll, #listBack, .recap__item, #btnContinue, #btnChapter, #sheetClose, .feedback button, #recapChip, #playBtn, #playerBack, #snackAction, .bar, #playerFrame, #playerUi, .sheet-scrim) { cursor: pointer; }
+.sheet__handle { cursor: grab; }
+/* клик мимо — рабочие зоны мигают синим */
+/* Подсветка рабочих зон при нажатии мимо — только контур. Ничего не подменяет (ни фон, ни собственные анимации),
+   поэтому не ломает кнопки и пункты пересказа. Свой transition не задаём, чтобы не перебить переходы самих элементов. */
+.screen :is(.promo__close, #vMetaBtn, #peekCard, #peekClose, .card.is-live, .row.is-live, #continueAll, #historyAll, #listBack, .recap__item, #btnContinue, #btnChapter, #sheetClose, .feedback button, #recapChip, #playBtn, #playerBack, #snackAction) { outline: 2px solid transparent; outline-offset: 2px; }
+.screen.show-hot :is(.promo__close, #vMetaBtn, #peekCard, #peekClose, .card.is-live, .row.is-live, #continueAll, #historyAll, #listBack, .recap__item, #btnContinue, #btnChapter, #sheetClose, .feedback button, #recapChip, #playBtn, #playerBack, #snackAction) { outline-color: rgba(38,136,235,.95); }
+
+@media (max-width: 760px) {
+  body { display: block; background: var(--bg); overflow: hidden; }
+  .stage { position: fixed; inset: 0; }
+  .phone { width: 100%; height: 100%; padding: 0; border-radius: 0; box-shadow: none; background: none; transform: none !important; }
+  .screen { width: 100%; height: 100%; border-radius: 0; }
+  .statusbar, .home-indicator, .hw, .phone::before { display: none; }
+  /* сверху — своя полоса под кнопку концепта: ничего не перекрывает */
+  .screen { --strip: 30px; --safe-top: calc(env(safe-area-inset-top, 0px) + var(--strip)); --safe-bottom: env(safe-area-inset-bottom, 0px); transition: background .3s; }
+  body.is-video .screen { background: #000; }
+  .view { inset: var(--safe-top) 0 0 0; }
+  .concept-pill { display: flex; position: fixed; z-index: 40; left: 0; right: 0; top: env(safe-area-inset-top, 0px); height: var(--strip, 30px); padding: 0 16px;
+    align-items: center; justify-content: space-between; background: transparent; font-size: 12.5px; color: rgba(225,227,230,.5); }
+  .concept-pill b { font-weight: 600; color: var(--link); }
+  .panel { position: fixed; z-index: 50; inset: 0; width: auto; height: 100%; border: 0; background: rgba(12,13,16,.97); padding: 28px 20px 40px; transform: translateY(100%); transition: transform .45s var(--ease-sheet); }
+  .panel.is-open { transform: none; }
+  .panel__close { display: block; width: 100%; height: 48px; margin-top: 20px; border-radius: var(--r-m); background: var(--white); color: #000; font-weight: 600; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+
+
+/* =====================================================================
+   Переключатель темы (на сайте, справа сверху)
+   ===================================================================== */
+.theme-switch { position: absolute; z-index: 45; top: 20px; right: 24px; display: flex; gap: 2px; padding: 4px; border-radius: var(--r-pill);
+  background: rgba(24,27,34,.92); border: 1px solid rgba(255,255,255,.08); isolation: isolate; }
+.theme-switch button { display: flex; align-items: center; gap: 6px; height: 32px; padding: 0 13px 0 11px; border-radius: var(--r-pill); font-size: 13px; font-weight: 600; color: #a6adb8; transition: background .25s var(--ease), color .25s; }
+.theme-switch svg { width: 16px; height: 16px; }
+.theme-switch button.is-on { color: #111; }
+
+/* =====================================================================
+   СВЕТЛАЯ ТЕМА — токены светлой палитры VKUI. Плеер остаётся тёмным, как в приложении.
+   ===================================================================== */
+body[data-theme="light"] {
+  --bg: #FFFFFF;
+  --bg-video: #FFFFFF;
+  --surface: #F2F3F5;          /* background_secondary */
+  --surface-2: #EBEDF0;
+  --sheet: #FFFFFF;
+  --separator: rgba(0,0,0,.08);
+  --text: #000000;             /* text_primary */
+  --text-2: #818C99;           /* text_secondary */
+  --text-tab: #99A2AD;
+  --accent-soft: rgba(38,136,235,.10);
+  --link: #2688EB;
+  background: radial-gradient(1200px 700px at 70% 30%, #f4f7fc 0%, #e3e8f0 60%) fixed, #e3e8f0;
+  color: #000;
+}
+/* сайт вокруг телефона */
+body[data-theme="light"] .panel { background: rgba(255,255,255,.72); border-right-color: rgba(0,0,0,.06); }
+body[data-theme="light"] .panel__badge { color: #4d5866; background: rgba(0,0,0,.04); border-color: rgba(0,0,0,.06); }
+body[data-theme="light"] .panel__lead { color: #4d5866; }
+
+body[data-theme="light"] :is(.panel__foot, .panel__note, .events__empty) { color: #8a93a1 !important; }
+body[data-theme="light"] .panel__note b { color: #2f3640; }
+body[data-theme="light"] .segmented { background: rgba(0,0,0,.05); }
+body[data-theme="light"] .segmented button { color: #5b6472; }
+body[data-theme="light"] .segmented button.is-on { background: #111; color: #fff; }
+body[data-theme="light"] .scenarios button { background: rgba(0,0,0,.035); }
+body[data-theme="light"] .scenarios button span { color: #6b7480; }
+body[data-theme="light"] .scenarios button.is-on { background: var(--accent-soft); }
+body[data-theme="light"] .events li { background: rgba(0,0,0,.04); color: #44505e; }
+body[data-theme="light"] .events li b { color: #1a73d9; }
+body[data-theme="light"] .theme-switch { background: rgba(255,255,255,.92); border-color: rgba(0,0,0,.06); box-shadow: 0 4px 16px rgba(30,40,60,.08); }
+body[data-theme="light"] .theme-switch button { color: #5b6472; }
+body[data-theme="light"] .theme-switch button.is-on { color: #fff; }
+
+/* корпус — серебристый */
+body[data-theme="light"] .phone { background: linear-gradient(150deg, #fbfbfc 0%, #d5d9df 22%, #eef0f3 50%, #c7ccd3 78%, #f6f7f8 100%);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.9), inset 0 0 0 3px #bcc2ca, 0 0 0 1px #aeb4bd, 0 50px 110px rgba(40,55,80,.28), 0 12px 30px rgba(40,55,80,.16); }
+body[data-theme="light"] .hw { background: linear-gradient(90deg, #aab1bb, #eef0f3 60%, #c3c8d0); }
+body[data-theme="light"] .hw--power { background: linear-gradient(270deg, #aab1bb, #eef0f3 60%, #c3c8d0); }
+body[data-theme="light"] .hw--camera { background: linear-gradient(270deg, #9aa1ab, #d8dce1); }
+
+/* статус-бар и полоска «домой» */
+
+
+/* экраны */
+body[data-theme="light"] .view::after { background: #000; }
+body[data-theme="light"] .view.is-under::after { opacity: .18; }
+body[data-theme="light"] .view--list { box-shadow: -16px 0 40px rgba(0,0,0,.12); }
+body[data-theme="light"] .tabbar { border-top-color: rgba(0,0,0,.06); }
+body[data-theme="light"] .tab.is-active { color: #000; }
+body[data-theme="light"] .feedback button { color: #818C99; }
+body[data-theme="light"] .list__search { background: #EBEDF0; color: #818C99; }
+body[data-theme="light"] .list__hint { color: #4d5866; }
+body[data-theme="light"] .comments__row p { color: #2C2D2E; }
+body[data-theme="light"] .thumb { background: #dfe2e6; }
+body[data-theme="light"] .thumb__dur, body[data-theme="light"] .thumb__left, body[data-theme="light"] .bar__tip { color: #fff; }
+
+/* кнопки-«таблетки»: в светлой теме основная кнопка тёмная */
+body[data-theme="light"] :is(.btn--white, .desc__recap-more) { background: #000; color: #fff; }
+
+/* плашка пересказа */
+body[data-theme="light"] .peek__main:active { background: rgba(0,0,0,.04); }
+body[data-theme="light"] .peek__close { color: #818C99; }
+body[data-theme="light"] .peek__ring-track { stroke: rgba(0,0,0,.08); }
+body[data-theme="light"] .peek__ring-fill { stroke: rgba(0,0,0,.35); }
+body[data-theme="light"] .fly { filter: drop-shadow(0 0 5px rgba(38,136,235,.5)); }
+
+/* шторки */
+body[data-theme="light"] .sheet-scrim { background: rgba(0,0,0,.3); }
+body[data-theme="light"] .sheet.is-on { box-shadow: 0 -10px 36px rgba(0,0,0,.14); }
+body[data-theme="light"] .sheet--desc { background: #FFFFFF; }
+body[data-theme="light"] .sheet__handle { background: #C4C8CC; }
+body[data-theme="light"] .desc__recap { background: linear-gradient(#F5F7FA, #F5F7FA) padding-box, linear-gradient(100deg, rgba(90,168,255,.7), rgba(167,123,255,.7)) border-box; }
+body[data-theme="light"] .recap__item:hover, body[data-theme="light"] .recap__item:focus-visible { background: rgba(0,0,0,.04); }
+body[data-theme="light"] .recap__text { color: #4d5866; }
+body[data-theme="light"] .recap__item--now::before { background: #000; box-shadow: 0 0 0 4px rgba(0,0,0,.08); }
+body[data-theme="light"] .recap__item--now .recap__tc { background: #000; color: #fff; }
+body[data-theme="light"] .skeleton__row { background: linear-gradient(90deg, #eceef1 0%, #f7f8fa 40%, #eceef1 80%); background-size: 200% 100%; }
+
+/* снекбар остаётся тёмным, как в VK */
+.snackbar { color: #fff; }
+body[data-theme="light"] .snackbar button { color: #71AAEB; }
+
+@media (max-width: 760px) {
+  .theme-switch { position: fixed; top: env(safe-area-inset-top, 0px); right: 112px; height: 30px; padding: 0; gap: 0; background: none !important; border: 0 !important; box-shadow: none !important; backdrop-filter: none; align-items: center; }
+  .theme-switch button { height: 26px; width: 30px; padding: 0; justify-content: center; background: none !important; color: rgba(225,227,230,.45); }
+  .theme-switch button span { display: none; }
+  .theme-switch button.is-on { color: var(--link); }
+  body[data-theme="light"] .theme-switch button { color: rgba(0,0,0,.35); }
+  body[data-theme="light"] .theme-switch button.is-on { color: var(--link); }
+  body[data-theme="light"] { background: var(--bg); }
+  body[data-theme="light"] .concept-pill { color: rgba(0,0,0,.45); }
+  body[data-theme="light"].is-video .screen { background: #000; }
+  body[data-theme="light"].is-video .concept-pill { color: rgba(255,255,255,.5); }
+  body[data-theme="light"].is-video .theme-switch button { color: rgba(255,255,255,.4); }
+  body[data-theme="light"] .panel { background: rgba(255,255,255,.97); }
+  body[data-theme="light"] .panel__close { background: #000; color: #fff; }
+}
+
+
+/* =====================================================================
+   Панель проверяющего: сценарии одним нажатием
+   ===================================================================== */
+@media (min-width: 761px) { .panel { position: relative; z-index: 2; } .stage { z-index: 1; } }
+.tour { display: grid; gap: 8px; }
+.tour__item { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; padding: 12px 12px 12px 12px; border-radius: 14px;
+  background: rgba(255,255,255,.04); border: 1px solid transparent; transition: background .2s, border-color .2s, transform .15s; }
+.tour__item:hover { background: rgba(255,255,255,.07); }
+.tour__item:active { transform: scale(.985); }
+.tour__item.is-on { border-color: var(--accent); background: var(--accent-soft); }
+
+
+
+
+
+
+
+
+
+.more { margin-top: 2px; }
+.more summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 6px; padding: 8px 2px; font-size: 13px; font-weight: 600; color: #8a92a0; user-select: none; }
+.more summary::-webkit-details-marker { display: none; }
+.more summary::before { content: ""; width: 7px; height: 7px; border-right: 1.6px solid currentColor; border-bottom: 1.6px solid currentColor; transform: rotate(-45deg); transition: transform .2s var(--ease); margin-right: 2px; }
+.more[open] > summary::before { transform: rotate(45deg); }
+.more[open] > .tour { margin-top: 4px; }
+.more--block { margin-top: 14px; border-top: 1px solid rgba(255,255,255,.06); padding-top: 6px; }
+.more--block .panel__note, .more--block .events { margin: 4px 0 6px; }
+.hint { display: flex; gap: 10px; align-items: flex-start; margin-top: 18px; padding: 12px 14px; border-radius: 14px; background: linear-gradient(135deg, rgba(90,168,255,.10), rgba(167,123,255,.10)); border: 1px solid rgba(120,150,255,.18); }
+.hint svg { flex: none; width: 16px; height: 16px; margin-top: 2px; color: var(--ai-1); }
+.hint p { margin: 0; font-size: 13.5px; line-height: 1.45; color: #c4cad3; }
+.hint.is-new { animation: hintIn .5s var(--ease-sheet); }
+@keyframes hintIn { from { opacity: 0; transform: translateY(6px); } }
+
+body[data-theme="light"] .tour__item { background: rgba(0,0,0,.035); }
+body[data-theme="light"] .tour__item:hover { background: rgba(0,0,0,.06); }
+body[data-theme="light"] .tour__item.is-on { background: var(--accent-soft); }
+
+body[data-theme="light"] .more summary { color: #6b7480; }
+
+body[data-theme="light"] .more--block { border-top-color: rgba(0,0,0,.06); }
+body[data-theme="light"] .hint { background: linear-gradient(135deg, rgba(90,168,255,.10), rgba(167,123,255,.10)); border-color: rgba(90,130,230,.2); }
+body[data-theme="light"] .hint p { color: #2f3640; }
+
+/* =====================================================================
+   Живой фон: искры на canvas + мягкое «сияние» за телефоном
+   ===================================================================== */
+.bgfx { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+.stage::before, .stage::after { content: ""; position: absolute; z-index: -1; border-radius: 50%; pointer-events: none; filter: blur(70px); will-change: transform; }
+.stage::before { width: 520px; height: 520px; left: 50%; top: 50%; margin: -330px 0 0 -380px;
+  background: radial-gradient(closest-side, rgba(70,120,255,.22), transparent); animation: auraA 18s ease-in-out infinite alternate; }
+.stage::after { width: 460px; height: 460px; left: 50%; top: 50%; margin: -150px 0 0 -40px;
+  background: radial-gradient(closest-side, rgba(150,100,255,.18), transparent); animation: auraB 22s ease-in-out infinite alternate; }
+@keyframes auraA { to { transform: translate(60px, 40px) scale(1.12); } }
+@keyframes auraB { to { transform: translate(-50px, -60px) scale(.92); } }
+body[data-theme="light"] .stage::before { background: radial-gradient(closest-side, rgba(90,168,255,.30), transparent); }
+body[data-theme="light"] .stage::after { background: radial-gradient(closest-side, rgba(167,123,255,.24), transparent); }
+
+@media (max-width: 760px) {
+  .bgfx, .stage::before, .stage::after { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .stage::before, .stage::after { animation: none; }
+}
+
+.promo__close:hover { background: rgba(255,255,255,.3); }
+
+/* Режим «Как сейчас в VK Видео»: никаких элементов доработки, как бы ни были заданы их стили */
+body:not([data-mode="after"]) :is(.only-after, .row__ai, .row .card__stop, .ai-tag, #peek) { display: none !important; }
+
+/* =====================================================================
+   Переключатель версий по центру над телефоном
+   ===================================================================== */
+.mode-switch { position: absolute; z-index: 45; top: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 2px; padding: 4px; border-radius: var(--r-pill);
+  background: rgba(24,27,34,.92); border: 1px solid rgba(255,255,255,.08); isolation: isolate; white-space: nowrap; }
+.mode-switch button { display: flex; align-items: center; gap: 6px; height: 32px; padding: 0 14px; border-radius: var(--r-pill); font-size: 13px; font-weight: 600; color: #a6adb8; transition: background .25s var(--ease), color .25s; }
+.mode-switch svg { width: 14px; height: 14px; color: var(--ai-1); }
+.mode-switch button.is-on { color: #111; }
+body[data-theme="light"] .mode-switch { background: rgba(255,255,255,.92); border-color: rgba(0,0,0,.06); box-shadow: 0 4px 16px rgba(30,40,60,.08); }
+body[data-theme="light"] .mode-switch button { color: #5b6472; }
+body[data-theme="light"] .mode-switch button.is-on { color: #fff; }
+.panel__mode { display: none; }
+/* на узком окне переключатель темы — только иконки, чтобы не наезжать на центральный */
+@media (min-width: 761px) and (max-width: 1240px) {
+  .theme-switch button { padding: 0 10px; }
+  .theme-switch button span { display: none; }
+}
+@media (max-width: 760px) {
+  .mode-switch { display: none; }
+  .panel__mode { display: block; }
+}
+
+/* Под открытой шторкой лента видео не нужна: прячем её, когда шторка доехала (0,5 с).
+   Иначе прокручиваемый слой на некоторых масштабах рамки проступал полоской у нижнего края. */
+#videoScroll { transition: visibility 0s; }
+body.sheet-open #videoScroll, body.desc-open #videoScroll { visibility: hidden; transition: visibility 0s .5s; }
+
+/* =====================================================================
+   Статус-бар iOS — iPhone 17 Pro (402 pt): высота 54, Dynamic Island 126×37 с отступом 11,
+   время по центру левого «уха», значки — по центру правого. SF Pro (системный шрифт на Apple).
+   ===================================================================== */
+.statusbar { position: absolute; z-index: 30; top: 0; left: 0; right: 0; height: var(--safe-top);
+  display: grid; grid-template-columns: 1fr 126px 1fr; align-items: center; padding-top: 6px;
+  color: #fff; background: var(--bg); transition: background .3s; pointer-events: none; }
+body.is-video .statusbar { background: #000; }
+.sb-left { display: flex; justify-content: center; padding-right: 14px; }
+.sb-time { font-family: -apple-system, "SF Pro Text", system-ui, sans-serif; font-size: 17px; font-weight: 600; letter-spacing: -.41px; line-height: 22px;
+  font-feature-settings: "tnum" 0; -webkit-font-smoothing: antialiased; }
+.island { grid-column: 2; justify-self: center; position: relative; width: 126px; height: 37px; margin-top: 5px; border-radius: 18.5px; background: #000; align-self: start; }
+.island__cam { position: absolute; right: 21px; top: 12px; width: 13px; height: 13px; border-radius: 50%;
+  background: radial-gradient(circle at 38% 35%, #1e2840 0 14%, #0b101c 44%, #030408 72%); box-shadow: inset 0 0 0 1px rgba(255,255,255,.04); }
+.sb-right { display: flex; justify-content: center; align-items: center; gap: 6px; padding-left: 8px; }
+.sb-cell { width: 18px; height: 12px; }
+.sb-wifi { width: 16px; height: 12px; }
+.sb-batt { width: 28px; height: 13px; margin-left: 1px; }
+.sb-batt__body { fill: none; stroke: currentColor; stroke-opacity: .35; stroke-width: 1; }
+.sb-batt__lvl { fill: currentColor; }
+.sb-batt__cap { fill: currentColor; fill-opacity: .4; }
+body[data-theme="light"] .statusbar { color: #000; }
+body[data-theme="light"].is-video .statusbar { color: #fff; }
+
+/* На телефоне прототип идёт на весь экран: настоящий статус-бар уже есть, нарисованный не нужен */
+@media (max-width: 760px) {
+  .statusbar, .home-indicator, .hw { display: none !important; }
+}
+
+/* Смена темы: мягкое растворение всего снимка страницы (View Transitions API) */
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: .42s; animation-timing-function: cubic-bezier(.4,0,.2,1); }
+html.vt *, html.vt *::before, html.vt *::after { transition: none !important; }
+
+/* Переключатели как в iOS: одна «таблетка» переезжает под выбранную кнопку, текст меняет цвет над ней.
+   Ничего не гаснет и не проявляется — значит, нечему мигать. */
+.mode-switch::before, .theme-switch::before { content: ""; position: absolute; z-index: 0; top: 4px; bottom: 4px; left: 0;
+  width: var(--pill-w, 0px); transform: translateX(var(--pill-x, 0px)); border-radius: var(--r-pill); background: #fff;
+  box-shadow: 0 1px 3px rgba(0,0,0,.18); }
+.pill-ready.mode-switch::before, .pill-ready.theme-switch::before { transition: transform .38s var(--ease-sheet), width .38s var(--ease-sheet); }
+.mode-switch button, .theme-switch button { position: relative; z-index: 1; background: none !important; transition: color .2s ease .05s; }
+body[data-theme="light"] .mode-switch::before, body[data-theme="light"] .theme-switch::before { background: #111; box-shadow: none; }
+@media (max-width: 760px) { .theme-switch::before { display: none; } }
+
+/* =====================================================================
+   Панель глав плеера: вкладки «Главы | ✦ Пересказ» (как вкладки «Каналы | Плейлисты» в приложении)
+   ===================================================================== */
+.player__chapter { text-align: left; font: inherit; color: #fff; font-weight: 500; cursor: pointer; }
+.ch-tabs { display: flex; gap: 22px; }
+.ch-tabs button { position: relative; display: inline-flex; align-items: center; gap: 6px; height: 40px; font-size: 19px; font-weight: 700; color: var(--text-2); transition: color .2s; }
+.ch-tabs button svg { width: 16px; height: 16px; color: var(--ai-1); }
+.ch-tabs button.is-on { color: var(--text); }
+.ch-tabs button::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 3px; border-radius: 2px; background: var(--text); transform: scaleX(0); transition: transform .3s var(--ease-sheet); }
+.ch-tabs button.is-on::after { transform: scaleX(1); }
+body:not([data-mode="after"]) .ch-tabs__recap { display: none !important; }
+body[data-mode="after"] .ch-tabs__recap.only-after { display: inline-flex; }
+.ch-tabs__recap[hidden] { display: none !important; }
+.ch-list { display: flex; flex-direction: column; margin: 4px -8px 0; }
+.ch-row { display: flex; align-items: center; gap: 12px; padding: 11px 8px; border-radius: 10px; text-align: left; transition: background .2s; }
+.ch-row:hover { background: rgba(255,255,255,.05); }
+.ch-row__tc { flex: none; min-width: 64px; font-size: 14px; font-weight: 600; color: var(--link); font-variant-numeric: tabular-nums; }
+.ch-row__title { flex: 1; min-width: 0; font-size: 16px; line-height: 1.3; }
+.ch-row.is-seen .ch-row__title { color: var(--text-2); }
+.ch-row.is-now { background: var(--surface); }
+.ch-row__now { flex: none; font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: var(--r-pill); background: var(--text); color: var(--bg); }
+.ch-recap__head { font-size: 19px; font-weight: 700; margin: 6px 0 10px; }
+.ch-recap__go { margin-top: 12px; }
+body[data-theme="light"] .ch-row:hover { background: rgba(0,0,0,.04); }
+body.sheet-open #videoScroll, body.desc-open #videoScroll { visibility: hidden; transition: visibility 0s .5s; }
+
+/* =====================================================================
+   Шторка пересказа в стиле «Описания» VK: один заголовок, родные таймкоды, одна основная кнопка
+   ===================================================================== */
+.sheet .sheet__head { padding: 2px 0 2px; }
+.sheet__title { display: flex; align-items: center; gap: 8px; margin: 0; font-size: 24px; font-weight: 700; letter-spacing: -.01em; }
+.sheet__spark { width: 20px; height: 20px; flex: none; color: var(--ai-1); }
+.sheet__sub { margin-top: 2px; font-size: 15px; color: var(--text-2); }
+.sheet__body { -webkit-mask-image: linear-gradient(transparent 0, #000 14px, #000 calc(100% - 18px), transparent);
+  mask-image: linear-gradient(transparent 0, #000 14px, #000 calc(100% - 18px), transparent); padding-top: 8px; }
+/* пункты: «14:05 — Название», ниже серый текст; тонкая линия слева — «путь по видео» */
+.recap::before { left: 3px; top: 12px; bottom: 26px; width: 2px; opacity: .22; }
+.recap__item { padding: 8px 8px 8px 20px; }
+.recap__item::before { display: none !important; }
+.recap__top { display: block; line-height: 1.32; } /* «47:52 — Название» переносится как обычный текст, тире не повисает */
+.recap__tc { background: none !important; padding: 0 !important; border-radius: 0; font-size: 16px; font-weight: 600; color: var(--link) !important; }
+.recap__dash { color: var(--text-2); white-space: pre; font-size: 16px; }
+.recap__title { font-size: 16px; font-weight: 600; }
+.recap__text { margin-top: 3px; font-size: 14.5px; line-height: 1.38; }
+/* финал списка — тихая отметка вместо белой плашки */
+.recap__item--now { padding-top: 10px; }
+.recap__item--now::after { content: ""; position: absolute; left: 0; top: 50%; width: 8px; height: 8px; margin-top: -2px; border-radius: 50%; background: var(--link); box-shadow: 0 0 0 4px var(--accent-soft); }
+.recap__next { font-size: 15px; font-weight: 500; color: var(--text-2); }
+/* кнопки: одна основная, вторичное — текстовой ссылкой */
+.sheet__buttons { gap: 0; margin-top: 8px; padding-top: 10px; border-top: 1px solid var(--separator); }
+.btn-link { height: 40px; width: 100%; border-radius: var(--r-m); font-size: 15px; font-weight: 600; color: var(--link); transition: background .2s; }
+.btn-link:active { background: var(--accent-soft); }
+/* подвал в одну строку */
+.sheet__foot { margin-top: 4px; justify-content: space-between; }
+.foot-info { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-2); padding: 6px 0; }
+.foot-info svg { width: 16px; height: 16px; }
+.feedback { align-items: center; gap: 2px; }
+.feedback__q { font-size: 13px; color: var(--text-2); margin-right: 4px; }
+.feedback button { width: 32px; height: 32px; background: none; }
+.feedback button svg { width: 19px; height: 19px; }
+.feedback button.is-on { background: var(--accent-soft); color: var(--link); }
+/* блок в «Описании» и вкладка в главах — те же заголовки */
+.desc__recap-head { display: flex; align-items: center; gap: 7px; font-size: 17px; font-weight: 700; }
+.desc__recap-head svg { width: 17px; height: 17px; color: var(--ai-1); }
+.desc__recap-title { font-size: 14.5px; font-weight: 400; color: var(--text-2); margin: 4px 0 8px; }
+.ch-recap__head { font-size: 15px; font-weight: 400; color: var(--text-2); margin: 8px 0 8px; }
+
+/* =====================================================================
+   Панель для проверяющего в стиле VK Видео: шапка с логотипом, заголовки разделов как в приложении,
+   сценарии — строками видео с превью, краевые случаи — чипсами, раскрывашки — ячейками списка
+   ===================================================================== */
+.panel { background: rgba(14,14,15,.82); border-right: 1px solid var(--separator); padding: 28px 24px 32px; }
+.panel__brand { display: flex; align-items: center; gap: 8px; }
+.panel__logo { width: 28px; height: 28px; border-radius: 8px; }
+.panel__brandname { font-size: 17px; font-weight: 700; letter-spacing: -.01em; }
+.panel__badge { margin-left: 2px; padding: 3px 9px; font-size: 12px; font-weight: 600; letter-spacing: 0; color: var(--text-2, #9a9ca0); background: var(--surface-2); border: 0; }
+.panel__title { margin-top: 22px; font-size: 30px; line-height: 1.1; letter-spacing: -.02em; }
+.panel__lead { margin-top: 10px; font-size: 15px; line-height: 1.45; color: #9a9ca0; }
+.panel__group { margin-top: 28px; }
+.panel__h { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 12px; font-size: 20px; font-weight: 700; letter-spacing: -.01em; }
+.panel__h-note { font-size: 14px; font-weight: 500; color: #8c8f94; letter-spacing: 0; }
+.panel__sub { margin: 18px 0 10px; font-size: 15px; font-weight: 600; color: #b3b6bb; }
+
+/* сценарии — как строки видео в VK: превью 16:9 с плашкой и полосой просмотра, справа название и подпись */
+.scn-list { display: flex; flex-direction: column; gap: 4px; margin: 0 -8px; }
+.panel .scn { display: flex; align-items: flex-start; gap: 12px; padding: 8px; border: 0; border-radius: 14px; background: none; transition: background .2s; }
+.panel .scn:hover { background: rgba(255,255,255,.05); }
+.panel .scn:active { transform: scale(.985); }
+.panel .scn.is-on { background: var(--accent-soft); }
+.scn__thumb { position: relative; flex: none; width: 128px; aspect-ratio: 16/9; border-radius: 10px; overflow: hidden; background: #000; }
+.scn__thumb img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .4s var(--ease); }
+.scn:hover .scn__thumb img { transform: scale(1.05); }
+.scn__tag { position: absolute; right: 5px; bottom: 7px; padding: 2px 6px; border-radius: 6px; background: rgba(0,0,0,.72); font-size: 11.5px; font-weight: 600; color: #fff; }
+.scn__bar { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: rgba(255,255,255,.28); }
+.scn__bar i { display: block; width: 51%; height: 100%; background: var(--accent); }
+.scn__play { position: absolute; inset: 0; display: grid; place-items: center; background: rgba(0,0,0,.28); opacity: 0; transition: opacity .2s; }
+.scn__play svg { width: 26px; height: 26px; color: #fff; filter: drop-shadow(0 1px 4px rgba(0,0,0,.5)); }
+.scn:hover .scn__play, .scn.is-on .scn__play { opacity: 1; }
+.scn__body { flex: 1; min-width: 0; padding-top: 1px; }
+.scn__body b { display: block; font-size: 15.5px; font-weight: 600; line-height: 1.25; }
+.scn__body span { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; margin-top: 3px; font-size: 13px; line-height: 1.35; color: #8c8f94; }
+.scn.is-on .scn__body b { color: var(--link); }
+
+/* краевые случаи — чипсы, как «Мои каналы / Кабинет автора» */
+.edge-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.panel .edge-chip { display: inline-flex; align-items: center; gap: 6px; width: auto; height: 36px; padding: 0 14px 0 11px; border: 0; border-radius: var(--r-pill); background: var(--surface-2); font-size: 14px; font-weight: 600; color: var(--text); transition: background .2s; }
+.panel .edge-chip svg { width: 14px; height: 14px; }
+.panel .edge-chip:hover { background: #38383a; }
+.panel .edge-chip.is-on { background: var(--accent); color: #fff; }
+
+/* подсказка — карточка как плашка пересказа в телефоне */
+.panel .hint { margin-top: 24px; padding: 14px; border-radius: var(--r-m); background: var(--surface); border: 0; box-shadow: inset 0 0 0 1px rgba(90,168,255,.18); }
+.panel .hint svg { width: 18px; height: 18px; margin-top: 1px; }
+.panel .hint p { font-size: 14px; color: #c9ccd0; }
+
+/* раскрывашки — ячейки списка VK: иконка в круге, текст, шеврон */
+.panel .more--block { margin-top: 0; padding-top: 0; border-top: 0; }
+.panel .more--block:first-of-type { margin-top: 18px; }
+.panel .more--block + .more--block { border-top: 1px solid var(--separator); }
+.panel .more--block summary { gap: 12px; padding: 12px 0; font-size: 15px; font-weight: 500; color: var(--text); }
+.panel .more--block summary::before { display: none; }
+.cell__ic { flex: none; width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; background: var(--surface-2); color: var(--link); }
+.cell__ic svg { width: 19px; height: 19px; }
+.cell__t { flex: 1; min-width: 0; }
+.cell__t small { display: block; margin-top: 1px; font-size: 13px; font-weight: 400; color: #8c8f94; }
+.cell__count { flex: none; min-width: 22px; height: 22px; padding: 0 6px; border-radius: 11px; background: var(--accent); color: #fff; font-size: 12px; font-weight: 700; display: grid; place-items: center; }
+.cell__count[hidden] { display: none; }
+.cell__chev { flex: none; width: 20px; height: 20px; color: #76787a; transition: transform .25s var(--ease); }
+.more[open] > summary .cell__chev { transform: rotate(90deg); }
+.panel .more--block .panel__note, .panel .more--block .events { margin: 0 0 12px 48px; }
+.panel__foot { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--separator); color: #6f7276; }
+
+/* светлая тема */
+body[data-theme="light"] .panel { background: rgba(255,255,255,.86); }
+body[data-theme="light"] .panel__badge { background: #EBECEF; color: #6D7885; }
+body[data-theme="light"] .panel__lead, body[data-theme="light"] .scn__body span, body[data-theme="light"] .panel__h-note, body[data-theme="light"] .cell__t small { color: #6D7885; }
+body[data-theme="light"] .panel__sub { color: #4d5866; }
+body[data-theme="light"] .panel .scn:hover { background: rgba(0,0,0,.04); }
+body[data-theme="light"] .panel .scn.is-on .scn__body b { color: var(--accent); }
+body[data-theme="light"] .panel .edge-chip { background: #EBECEF; color: #000; }
+body[data-theme="light"] .panel .edge-chip:hover { background: #E1E3E6; }
+body[data-theme="light"] .panel .edge-chip.is-on { background: var(--accent); color: #fff; }
+body[data-theme="light"] .panel .hint { background: #F2F3F5; box-shadow: inset 0 0 0 1px rgba(38,136,235,.18); }
+body[data-theme="light"] .panel .hint p { color: #2f3640; }
+body[data-theme="light"] .panel .more--block summary { color: #000; }
+body[data-theme="light"] .cell__ic { background: #EBECEF; color: var(--accent); }
+body[data-theme="light"] .panel .more--block + .more--block, body[data-theme="light"] .panel__foot { border-color: rgba(0,0,0,.08); }
+@media (max-width: 760px) {
+  .panel { padding: 22px 16px 36px; background: rgba(14,14,15,.98); }
+  body[data-theme="light"] .panel { background: rgba(255,255,255,.98); }
+  .scn__thumb { width: 120px; }
+}
+body[data-theme="light"] .panel .scn { background: none; }
+body[data-theme="light"] .panel .scn:hover { background: rgba(0,0,0,.04); }
+body[data-theme="light"] .panel .scn.is-on { background: var(--accent-soft); }
+
+/* =====================================================================
+   Демо-курсор в сценарии «Вернулся через 3 дня»
+   ===================================================================== */
+.ghost { position: absolute; left: 0; top: 0; z-index: 80; pointer-events: none; opacity: 0; will-change: transform; }
+.ghost.is-on { opacity: 1; }
+.ghost__arrow { position: absolute; left: -5px; top: -3px; width: 30px; height: 30px; filter: drop-shadow(0 3px 6px rgba(0,0,0,.45)); transition: transform .16s var(--ease); transform-origin: 5px 3px; }
+.ghost.is-press .ghost__arrow { transform: scale(.82); }
+.ghost__tap { position: absolute; left: -22px; top: -22px; width: 44px; height: 44px; border-radius: 50%; background: rgba(255,255,255,.35); box-shadow: 0 0 0 2px rgba(255,255,255,.6); opacity: 0; transform: scale(.3); }
+.ghost.is-press .ghost__tap { animation: ghostTap .55s var(--ease) forwards; }
+@keyframes ghostTap { 0% { opacity: .95; transform: scale(.3); } 100% { opacity: 0; transform: scale(1.5); } }
+.ghost__label { position: absolute; left: 24px; top: 24px; padding: 2px 7px; border-radius: 6px; background: var(--accent); color: #fff; font-size: 11px; font-weight: 700; white-space: nowrap; box-shadow: 0 2px 8px rgba(0,0,0,.35); }
+@media (prefers-reduced-motion: reduce) { .ghost { transition: none !important; } }
+.ghost.is-drag .ghost__arrow { transform: scale(.86); }
+.ghost.is-drag .ghost__tap { opacity: .55; transform: scale(.75); transition: opacity .2s, transform .2s; }
+
+/* статус демо: под телефоном (десктоп) / в верхней полоске (мобильный) — не перекрывает интерфейс */
+.demo-status { position: absolute; z-index: 46; left: 50%; bottom: 16px; display: flex; align-items: center; gap: 10px; max-width: calc(100% - 40px);
+  padding: 8px 14px 8px 12px; border-radius: var(--r-pill); background: rgba(28,28,30,.9); border: 1px solid rgba(255,255,255,.08); box-shadow: 0 8px 28px rgba(0,0,0,.35);
+  color: #fff; font-size: 14px; font-weight: 600; white-space: nowrap; pointer-events: none;
+  opacity: 0; transform: translate(-50%, 10px) scale(.97); transition: opacity .3s, transform .35s var(--ease-sheet); }
+.demo-status.is-on { opacity: 1; transform: translate(-50%, 0) scale(1); }
+.demo-status__live { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 0 rgba(38,136,235,.6); animation: livePulse 1.6s infinite; }
+@keyframes livePulse { 0% { box-shadow: 0 0 0 0 rgba(38,136,235,.55); } 70% { box-shadow: 0 0 0 8px rgba(38,136,235,0); } 100% { box-shadow: 0 0 0 0 rgba(38,136,235,0); } }
+.demo-status.is-done .demo-status__live { background: #4BB34B; animation: none; }
+.demo-status__text { overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.demo-status__text.is-in { animation: statusIn .35s var(--ease); }
+@keyframes statusIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
+.demo-status__steps { display: flex; gap: 3px; flex: none; }
+.demo-status__steps:empty { display: none; }
+.demo-status__steps i { width: 6px; height: 6px; border-radius: 3px; background: rgba(255,255,255,.22); transition: width .3s var(--ease), background .3s; }
+.demo-status__steps i.is-done { background: rgba(113,170,235,.7); }
+.demo-status__steps i.is-now { width: 16px; background: var(--accent); }
+body[data-theme="light"] .demo-status { background: rgba(255,255,255,.95); border-color: rgba(0,0,0,.06); color: #000; box-shadow: 0 8px 24px rgba(30,40,60,.12); }
+body[data-theme="light"] .demo-status__steps i { background: rgba(0,0,0,.12); }
+@media (max-width: 760px) {
+  /* в верхней полоске вместо «Концепт для VK Видео · Как смотреть» */
+  .demo-status { position: fixed; z-index: 42; left: 0; right: 0; bottom: auto; top: env(safe-area-inset-top, 0px); height: var(--strip, 30px); max-width: none;
+    padding: 0 16px; gap: 8px; border: 0; border-radius: 0; box-shadow: none; background: var(--bg); font-size: 13px; transform: translateY(-4px); }
+  .demo-status.is-on { transform: none; }
+  body.is-video .demo-status { background: #000; }
+  body[data-theme="light"] .demo-status { background: var(--bg); box-shadow: none; }
+  body[data-theme="light"].is-video .demo-status { background: #000; color: #fff; }
+  .demo-status__text { flex: 1; }
+}
+@media (max-width: 760px) { body.demo-on :is(.theme-switch, .concept-pill) { opacity: 0; pointer-events: none; } }
+
+/* ---- окошко пошагового демо ---- */
+.demo-status { pointer-events: auto; }
+.ds__head { display: contents; }
+.ds__scn { display: none; }
+.ds__foot { display: contents; }
+.ds__next { flex: none; height: 30px; padding: 0 14px; border-radius: var(--r-pill); background: var(--accent); color: #fff; font-size: 14px; font-weight: 600;
+  opacity: .35; pointer-events: none; transition: opacity .25s, transform .2s var(--ease), background .2s; }
+.demo-status.is-waiting .ds__next, .demo-status.is-done .ds__next { opacity: 1; pointer-events: auto; animation: nextIn .4s var(--ease); }
+.ds__next:hover { background: #3a95ee; }
+.ds__next:active { transform: scale(.95); }
+.demo-status.is-done .ds__next { background: rgba(255,255,255,.14); }
+@keyframes nextIn { from { transform: scale(.9); } to { transform: none; } }
+.demo-status__steps { display: none; }
+
+.demo-status.is-side { bottom: auto; width: 284px; max-width: none; flex-direction: column; align-items: stretch; gap: 0;
+  padding: 14px 16px 14px; border-radius: 18px; white-space: normal;
+  background: rgba(30,30,34,.42); border: 1px solid rgba(255,255,255,.1); box-shadow: 0 10px 34px rgba(0,0,0,.28);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4); backdrop-filter: blur(20px) saturate(1.4);
+  transform: translateX(-10px); }
+.demo-status.is-side.is-on { transform: none; }
+.is-side .ds__head { display: flex; align-items: center; gap: 7px; margin-bottom: 8px; font-size: 12.5px; font-weight: 600; color: rgba(255,255,255,.5); }
+.is-side .ds__scn { display: block; }
+.is-side .demo-status__text { font-size: 17px; line-height: 1.32; font-weight: 600; overflow: visible; }
+.is-side .ds__foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 14px; }
+.is-side .demo-status__steps { display: flex; gap: 4px; flex: 1; }
+.is-side .demo-status__steps i { flex: 1; width: auto; height: 3px; border-radius: 2px; }
+.is-side .demo-status__steps i.is-now { width: auto; }
+body[data-theme="light"] .demo-status.is-side { background: rgba(255,255,255,.55); border-color: rgba(0,0,0,.06); box-shadow: 0 10px 30px rgba(30,40,60,.10); color: #000; }
+body[data-theme="light"] .is-side .ds__head { color: rgba(0,0,0,.5); }
+body[data-theme="light"] .demo-status.is-done .ds__next { background: rgba(0,0,0,.08); color: #000; }
+@media (max-width: 760px) {
+  /* мобильный: сверху, текст в две строки, «Далее» справа */
+  .demo-status { height: auto; min-height: var(--strip, 30px); padding: 6px 10px 6px 16px; white-space: normal; align-items: center; }
+  .demo-status__text { font-size: 13px; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+  .ds__next { height: 28px; padding: 0 12px; font-size: 13px; }
+}
+.demo-status:not(.is-on) { pointer-events: none; }
+/* «Далее» мягко пульсирует, пока ждёт нажатия */
+.demo-status.is-waiting .ds__next { animation: nextIn .4s var(--ease), nextPulse 1.8s ease-out .5s infinite; }
+@keyframes nextPulse {
+  0%   { box-shadow: 0 0 0 0 rgba(38,136,235,.55); transform: scale(1); }
+  35%  { transform: scale(1.05); }
+  70%  { box-shadow: 0 0 0 10px rgba(38,136,235,0); transform: scale(1); }
+  100% { box-shadow: 0 0 0 0 rgba(38,136,235,0); }
+}
+@media (prefers-reduced-motion: reduce) { .demo-status.is-waiting .ds__next { animation: none; } }
+
+/* Светлая тема: сияние за телефоном ярче и насыщеннее — на белом фоне бледные пятна почти не видны */
+body[data-theme="light"] .stage::before { width: 620px; height: 620px; margin: -380px 0 0 -440px; filter: blur(60px);
+  background: radial-gradient(closest-side, rgba(38,136,235,.55), rgba(90,168,255,.22) 55%, transparent); }
+body[data-theme="light"] .stage::after { width: 560px; height: 560px; margin: -170px 0 0 -40px; filter: blur(60px);
+  background: radial-gradient(closest-side, rgba(139,92,246,.48), rgba(167,123,255,.18) 55%, transparent); }
+body[data-theme="light"] .bgfx { mix-blend-mode: multiply; }
+body[data-theme="light"] .stage::before { width: 700px; height: 700px; margin: -420px 0 0 -480px; filter: blur(50px);
+  background: radial-gradient(closest-side, rgba(38,136,235,.78), rgba(90,168,255,.35) 50%, transparent); }
+body[data-theme="light"] .stage::after { width: 640px; height: 640px; margin: -200px 0 0 -60px; filter: blur(50px);
+  background: radial-gradient(closest-side, rgba(139,92,246,.7), rgba(167,123,255,.3) 50%, transparent); }
+/* Светлая тема: сияние уходит под слой со звёздочками (иначе плотный градиент «замыливает» искры).
+   Центр — середина области справа от панели, то есть за телефоном. */
+@media (min-width: 761px) {
+  body[data-theme="light"] .stage::before, body[data-theme="light"] .stage::after { display: none; }
+  body[data-theme="light"]::before, body[data-theme="light"]::after { content: ""; position: fixed; z-index: -1; border-radius: 50%; pointer-events: none; filter: blur(50px); will-change: transform;
+    left: calc(380px + (100vw - 380px) / 2); top: 50%; }
+  body[data-theme="light"]::before { width: 700px; height: 700px; margin: -420px 0 0 -480px;
+    background: radial-gradient(closest-side, rgba(38,136,235,.62), rgba(90,168,255,.28) 50%, transparent); animation: auraA 18s ease-in-out infinite alternate; }
+  body[data-theme="light"]::after { width: 640px; height: 640px; margin: -200px 0 0 -60px;
+    background: radial-gradient(closest-side, rgba(139,92,246,.55), rgba(167,123,255,.24) 50%, transparent); animation: auraB 22s ease-in-out infinite alternate; }
+  body[data-theme="light"] .bgfx { mix-blend-mode: normal; }
+}
+@media (prefers-reduced-motion: reduce) { body[data-theme="light"]::before, body[data-theme="light"]::after { animation: none; } }
+
+/* =====================================================================
+   ИИ-знак VK: искры с официальным ИИ-градиентом; кнопка «Пересказ» — всегда с подписью
+   ===================================================================== */
+:is(.ai-tag, .peek__icon, .sheet__title, .desc__recap-head, .skeleton__status, .list__hint, .ds__head, .hint, .mode-switch, .ch-tabs) svg:has(use[href="#i-spark"]) { fill: url(#g-ai); }
+.fly { fill: url(#g-ai); filter: drop-shadow(0 0 6px rgba(185,132,237,.7)); }
+.recap::before { background: linear-gradient(var(--ai-1), var(--ai-2), var(--ai-3)); }
+/* Внутри интерфейса VK Видео искры — одним голубым (лучше сочетается с синим акцентом VK).
+   Полный ИИ-градиент VK — только снаружи телефона: переключатель версий, панель, окошко демо. */
+.screen svg:has(use[href="#i-spark"]), .screen .fly { fill: var(--ai-1); }
+.screen .fly { filter: drop-shadow(0 0 6px rgba(78,175,255,.75)); }
+.screen .recap::before, .screen .seg.is-hl i { background: var(--ai-1); }
+/* Верх экрана при входе/выходе из видео.
+   Выход: видео уезжает вниз, сверху уже экран «Моё» — фон статус-бара меняется сразу, без затухания через чёрный.
+   Вход: чернеет, только когда видео доехало до верха, — нет чёрной полосы над ещё пустым экраном. */
+.statusbar { transition: background 0s, color 0s; }
+body.is-video .statusbar { transition: background .18s linear .28s, color .18s linear .28s; }
+@media (max-width: 760px) {
+  .screen { transition: background 0s; }
+  body.is-video .screen { transition: background .18s linear .28s; }
+}
+
+/* Мобильный: пока идёт демо, верхняя полоса выше (фраза в две строки + «Далее»),
+   а интерфейс приложения плавно сдвигается вниз — окошко ничего не перекрывает */
+@property --strip { syntax: '<length>'; inherits: true; initial-value: 30px; }
+@media (max-width: 760px) {
+  body.demo-on .screen { --strip: 52px; }
+  .screen { transition: background 0s, --strip .3s var(--ease-sheet); }
+  body.is-video .screen { transition: background .18s linear .28s, --strip .3s var(--ease-sheet); }
+  body.demo-on .demo-status { min-height: 52px; top: env(safe-area-inset-top, 0px); transform: none; }
+}

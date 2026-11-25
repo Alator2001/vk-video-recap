@@ -1,0 +1,397 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#19191A" />
+  <title>Концепт: «Продолжить с пересказом» — VK Видео</title>
+  <meta name="description" content="Концепт-прототип доработки для VK Видео: ИИ-пересказ уже просмотренной части длинного видео при возвращении к нему. Не официальный продукт VK." />
+  <link rel="stylesheet" href="styles.css?v=76" />
+</head>
+<body data-mode="after" data-theme="dark">
+  <!-- Тема выставляется до первой отрисовки — без вспышки тёмной темы у тех, кто выбрал светлую -->
+  <script>try { var t = localStorage.getItem('vk-recap-theme'); if (t === 'light' || t === 'dark') document.body.dataset.theme = t; } catch (e) {}</script>
+  <canvas class="bgfx" id="bgfx" aria-hidden="true"></canvas>
+
+  <!-- Панель для проверяющего (на десктопе — слева, на телефоне — в шторке) -->
+  <aside class="panel" id="panel" aria-label="Управление концептом">
+    <div class="panel__inner">
+      <!-- Шапка панели — как шапка экрана в VK Видео: логотип, название, пометка «Концепт» -->
+      <div class="panel__brand">
+        <img class="panel__logo" src="media/vk-video-logo.png" alt="">
+        <span class="panel__brandname">VK Видео</span>
+        <span class="panel__badge">Концепт</span>
+      </div>
+      <h1 class="panel__title">Продолжить с&nbsp;пересказом</h1>
+      <p class="panel__lead">
+        Вернулись к&nbsp;длинному видео через несколько дней&nbsp;— VK Видео коротко напоминает, что было до места остановки. Без спойлеров дальше.
+      </p>
+
+      <div class="panel__group panel__mode">
+        <div class="panel__h">Версия</div>
+        <div class="segmented">
+          <button data-mode-set="before">Сейчас в&nbsp;VK Видео</button>
+          <button data-mode-set="after">С доработкой</button>
+        </div>
+      </div>
+
+      <div class="panel__group">
+        <div class="panel__h">Сценарии<span class="panel__h-note">откроются в&nbsp;телефоне</span></div>
+        <div class="scn-list" id="tour">
+          <button class="tour__item scn" data-tour="days">
+            <span class="scn__thumb"><img src="media/cinema.jpg" alt=""><span class="scn__tag">3 дня назад</span><span class="scn__bar"><i style="width:36%"></i></span><span class="scn__play"><svg viewBox="0 0 24 24"><use href="#i-play"/></svg></span></span>
+            <span class="scn__body"><b>Вернулся через 3&nbsp;дня</b><span>Видео продолжается, под плеером появляется плашка с&nbsp;пересказом</span></span>
+          </button>
+          <button class="tour__item scn" data-tour="hours">
+            <span class="scn__thumb"><img src="media/gaming.jpg" alt=""><span class="scn__tag">2 часа назад</span><span class="scn__bar"><i style="width:60%"></i></span><span class="scn__play"><svg viewBox="0 0 24 24"><use href="#i-play"/></svg></span></span>
+            <span class="scn__body"><b>Вернулся через 2&nbsp;часа</b><span>Человек и&nbsp;так помнит&nbsp;— плашки нет, пересказ по&nbsp;кнопке</span></span>
+          </button>
+          <button class="tour__item scn" data-tour="skips">
+            <span class="scn__thumb"><img src="media/gaming.jpg" alt=""><span class="scn__tag">Пропущено ×2</span><span class="scn__bar"><i style="width:60%"></i></span><span class="scn__play"><svg viewBox="0 0 24 24"><use href="#i-play"/></svg></span></span>
+            <span class="scn__body"><b>Дважды пропустил плашку</b><span>Автопоказ выключается и&nbsp;включается снова, если открыть пересказ вручную</span></span>
+          </button>
+        </div>
+        <div class="panel__sub">Краевые случаи</div>
+        <div class="edge-chips">
+          <button class="tour__item edge-chip" data-tour="nospeech"><svg viewBox="0 0 24 24"><use href="#i-play"/></svg>Видео без речи</button>
+          <button class="tour__item edge-chip" data-tour="error"><svg viewBox="0 0 24 24"><use href="#i-play"/></svg>Ошибка загрузки</button>
+        </div>
+      </div>
+
+      <div class="hint" id="tourHint" aria-live="polite">
+        <svg viewBox="0 0 24 24"><use href="#i-spark"/></svg>
+        <p id="tourHintText">Выберите сценарий выше&nbsp;— или просто нажмите на&nbsp;видео в&nbsp;блоке «Продолжить просмотр» в&nbsp;телефоне.</p>
+      </div>
+
+      <details class="more more--block">
+        <summary><span class="cell__ic"><svg viewBox="0 0 24 24"><use href="#i-info"/></svg></span><span class="cell__t">Правила показа пересказа</span><svg class="cell__chev" viewBox="0 0 24 24"><use href="#i-chevron"/></svg></summary>
+        <p class="panel__note" id="styleNote"></p>
+      </details>
+      <details class="more more--block">
+        <summary><span class="cell__ic"><svg viewBox="0 0 24 24"><use href="#i-play-square"/></svg></span><span class="cell__t">События аналитики<small>для A/B-теста, пишутся вживую</small></span><span class="cell__count" id="evCount" hidden>0</span><svg class="cell__chev" viewBox="0 0 24 24"><use href="#i-chevron"/></svg></summary>
+        <ul class="events" id="events"><li class="events__empty">Пока пусто&nbsp;— взаимодействуйте с&nbsp;прототипом</li></ul>
+      </details>
+
+      <p class="panel__foot">
+        Концепт, не&nbsp;официальный продукт VK. Данные, каналы и&nbsp;видео вымышлены. Интерфейс воспроизводит мобильное приложение VK Видео для демонстрации идеи.
+      </p>
+      <button class="panel__close" id="panelClose">Вернуться к&nbsp;прототипу</button>
+    </div>
+  </aside>
+
+  <!-- Телефон -->
+  <main class="stage" id="stage">
+    <!-- Переключатель темы: в приложении он в настройках, здесь — для проверяющего -->
+    <!-- Сравнение версий: по центру над телефоном -->
+    <div class="mode-switch" role="radiogroup" aria-label="Версия приложения">
+      <button role="radio" data-mode-set="before">Сейчас в&nbsp;VK Видео</button>
+      <button role="radio" data-mode-set="after"><svg viewBox="0 0 24 24"><use href="#i-spark"/></svg>С доработкой</button>
+    </div>
+    <div class="theme-switch" id="themeSwitch" role="radiogroup" aria-label="Тема оформления">
+      <button role="radio" data-theme-set="dark" aria-label="Тёмная тема"><svg viewBox="0 0 24 24"><use href="#i-moon"/></svg><span>Тёмная</span></button>
+      <button role="radio" data-theme-set="light" aria-label="Светлая тема"><svg viewBox="0 0 24 24"><use href="#i-sun"/></svg><span>Светлая</span></button>
+    </div>
+    <div class="phone" id="phone">
+      <!-- боковые кнопки корпуса -->
+      <i class="hw hw--action" aria-hidden="true"></i>
+      <i class="hw hw--vol-up" aria-hidden="true"></i>
+      <i class="hw hw--vol-down" aria-hidden="true"></i>
+      <i class="hw hw--power" aria-hidden="true"></i>
+      <i class="hw hw--camera" aria-hidden="true"></i>
+      <div class="screen" id="screen">
+
+        <!-- Статус-бар iOS (iPhone 17 Pro): пропорции значков и раскладка — как в системе -->
+        <div class="statusbar" aria-hidden="true">
+          <div class="sb-left"><span class="sb-time">9:41</span></div>
+          <span class="island"><i class="island__cam"></i></span>
+          <div class="sb-right">
+            <!-- сотовая связь: 4 столбика по возрастанию -->
+            <svg class="sb-cell" viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="7.4" width="3.2" height="4.6" rx="1"/><rect x="4.8" y="5" width="3.2" height="7" rx="1"/><rect x="9.6" y="2.6" width="3.2" height="9.4" rx="1"/><rect x="14.4" y="0" width="3.2" height="12" rx="1"/></svg>
+            <!-- Wi-Fi: три сектора, как в SF Symbols -->
+            <svg class="sb-wifi" viewBox="0 0 16 12" fill="currentColor"><path d="M8 2.4c2.3 0 4.4.88 6 2.33.18.16.45.16.62-.01l1.04-1.05a.45.45 0 0 0-.01-.65A11.05 11.05 0 0 0 8 0C5.03 0 2.33 1.15.35 3.02a.45.45 0 0 0-.01.65l1.04 1.05c.17.17.44.17.62.01A8.83 8.83 0 0 1 8 2.4Z"/><path d="M8 5.97c1.33 0 2.55.49 3.48 1.3.18.16.45.15.62-.02l1.04-1.05a.45.45 0 0 0-.02-.66A7.42 7.42 0 0 0 8 3.57c-1.97 0-3.76.75-5.12 1.97a.45.45 0 0 0-.02.66L3.9 7.25c.17.17.44.18.62.02A5.27 5.27 0 0 1 8 5.97Z"/><path d="M10.07 8.84c.18-.18.17-.47-.03-.63A3.2 3.2 0 0 0 8 7.5c-.77 0-1.48.27-2.04.71-.2.16-.21.45-.03.63l1.75 1.77c.18.18.46.18.64 0l1.75-1.77Z"/></svg>
+            <!-- батарея: контур 35%, заряд, «носик» -->
+            <svg class="sb-batt" viewBox="0 0 28 13"><rect class="sb-batt__body" x=".5" y=".5" width="24" height="12" rx="3.8"/><rect class="sb-batt__lvl" x="2" y="2" width="21" height="9" rx="2.4"/><path class="sb-batt__cap" d="M26 4.4v4.2c.84-.34 1.4-1.17 1.4-2.1s-.56-1.76-1.4-2.1Z"/></svg>
+          </div>
+        </div>
+
+        <!-- Экран «Моё» -->
+        <section class="view view--moe is-active" id="viewMoe" aria-label="Моё">
+          <div class="scroll" id="moeScroll">
+            <header class="profile">
+              <div class="avatar avatar--me" role="img" aria-label="Даниил Старцев"></div>
+              <div class="profile__text">
+                <div class="profile__name">Даниил Старцев</div>
+                <div class="profile__sub">Сменить аккаунт</div>
+              </div>
+              <button class="icon-btn" aria-label="Уведомления"><svg viewBox="0 0 24 24"><use href="#i-bell"/></svg></button>
+              <button class="icon-btn" aria-label="Настройки"><svg viewBox="0 0 24 24"><use href="#i-gear"/></svg></button>
+            </header>
+
+            <div class="chips">
+              <button class="chip">Мои каналы</button>
+              <button class="chip">Кабинет автора</button>
+              <button class="chip">VK Видео для авторов</button>
+            </div>
+
+            <div class="promo">
+              <img class="promo__logo" src="media/vk-video-logo.png" width="53" height="53" alt="" aria-hidden="true" />
+              <div class="promo__text">
+                <div class="promo__title">Отключить рекламу</div>
+                <div class="promo__sub">Бесплатно на 14 дней</div>
+              </div>
+              <button class="promo__close" aria-label="Скрыть"><svg viewBox="0 0 24 24"><use href="#i-close"/></svg></button>
+            </div>
+
+            <!-- НОВОЕ: Продолжить просмотр -->
+            <section class="shelf shelf--continue only-after" id="continueShelf">
+              <div class="shelf__head">
+                <h2 class="shelf__title">Продолжить просмотр</h2>
+                <button class="shelf__more" id="continueAll">Показать все</button>
+              </div>
+              <div class="shelf__row" id="continueRow"></div>
+            </section>
+
+            <section class="shelf">
+              <div class="shelf__head">
+                <h2 class="shelf__title">История просмотра</h2>
+                <button class="shelf__more" id="historyAll">Показать все</button>
+              </div>
+              <div class="shelf__row" id="historyRow"></div>
+            </section>
+
+            <section class="shelf">
+              <div class="shelf__head">
+                <h2 class="shelf__title">Смотреть позже</h2>
+                <button class="shelf__more">Показать все</button>
+              </div>
+              <div class="shelf__row" id="laterRow"></div>
+            </section>
+            <div class="scroll__pad"></div>
+          </div>
+
+          <nav class="tabbar" aria-label="Навигация">
+            <button class="tab"><svg viewBox="0 0 24 24"><use href="#i-home"/></svg><span>Главная</span></button>
+            <button class="tab"><svg viewBox="0 0 24 24"><use href="#i-clips"/></svg><span>Клипы</span></button>
+            <button class="tab"><svg viewBox="0 0 24 24"><use href="#i-create"/></svg><span>Создать</span></button>
+            <button class="tab"><svg viewBox="0 0 24 24"><use href="#i-subs"/></svg><span>Подписки</span></button>
+            <button class="tab is-active"><svg viewBox="0 0 24 24"><use href="#i-me"/></svg><span>Моё</span></button>
+          </nav>
+        </section>
+
+        <!-- Экран-список: «Продолжить просмотр» (НОВОЕ) и «История просмотра» (как в приложении) -->
+        <section class="view view--list" id="viewList" aria-label="Список видео">
+          <header class="listhead">
+            <button class="icon-btn" id="listBack" aria-label="Назад"><svg viewBox="0 0 24 24"><use href="#i-back"/></svg></button>
+            <h1 class="listhead__title" id="listTitle">Продолжить просмотр</h1>
+            <button class="icon-btn listhead__trash" id="listTrash" aria-label="Очистить историю"><svg viewBox="0 0 24 24"><use href="#i-trash"/></svg></button>
+          </header>
+          <div class="scroll">
+            <div class="list__search" id="listSearch"><svg viewBox="0 0 24 24"><use href="#i-search"/></svg><span>Поиск</span></div>
+            <p class="list__hint" id="listHint"><svg viewBox="0 0 24 24"><use href="#i-spark"/></svg>Недосмотренные видео длиннее 20&nbsp;минут. К&nbsp;каждому есть пересказ того, что вы уже посмотрели</p>
+            <div id="continueRows"></div>
+            <div class="scroll__pad"></div>
+          </div>
+          <nav class="tabbar" aria-label="Навигация">
+            <button class="tab"><svg viewBox="0 0 24 24"><use href="#i-home"/></svg><span>Главная</span></button>
+            <button class="tab"><svg viewBox="0 0 24 24"><use href="#i-clips"/></svg><span>Клипы</span></button>
+            <button class="tab"><svg viewBox="0 0 24 24"><use href="#i-create"/></svg><span>Создать</span></button>
+            <button class="tab"><svg viewBox="0 0 24 24"><use href="#i-subs"/></svg><span>Подписки</span></button>
+            <button class="tab is-active"><svg viewBox="0 0 24 24"><use href="#i-me"/></svg><span>Моё</span></button>
+          </nav>
+        </section>
+
+        <!-- Экран видео -->
+        <section class="view view--video" id="viewVideo" aria-label="Видео">
+          <div class="player" id="player">
+            <div class="player__frame" id="playerFrame">
+              <div class="scene"><i class="scene__glow"></i><i class="scene__desk"></i><i class="scene__p scene__p--a"></i><i class="scene__p scene__p--b"></i></div>
+              <video class="player__video" id="playerVideo" muted loop playsinline preload="auto" aria-hidden="true"></video>
+            </div>
+            <div class="player__ui" id="playerUi">
+              <button class="player__back" id="playerBack" aria-label="Назад"><svg viewBox="0 0 24 24"><use href="#i-back"/></svg></button>
+              <div class="player__center">
+                <button class="player__play" id="playBtn" aria-label="Пауза"><svg viewBox="0 0 24 24"><use href="#i-pause"/></svg></button>
+                <button class="player__next" aria-label="Следующее"><svg viewBox="0 0 24 24"><use href="#i-next"/></svg></button>
+              </div>
+              <div class="player__bottom">
+                <div class="player__meta">
+                  <span class="player__time"><b id="timeCur">1:16:38</b> / <span id="timeDur">2:31:40</span></span>
+                  <button class="player__chapter" id="chapterLabel" aria-label="Главы">Ошибки новичков</button>
+                  <span class="player__icons">
+                    <svg viewBox="0 0 24 24"><use href="#i-cast"/></svg>
+                    <svg viewBox="0 0 24 24"><use href="#i-gear"/></svg>
+                    <svg viewBox="0 0 24 24"><use href="#i-full"/></svg>
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div class="bar" id="bar" aria-label="Перемотка" role="slider"><div class="bar__track" id="barTrack"></div><div class="bar__thumb" id="barThumb"></div><div class="bar__tip" id="barTip"></div></div>
+          </div>
+
+          <div class="vbody">
+            <div class="scroll" id="videoScroll">
+              <!-- НОВОЕ: неблокирующая плашка пересказа — видео играет, плашка сворачивается сама -->
+              <div class="peek" id="peek" aria-live="polite">
+                <div class="peek__inner">
+                  <div class="peek__card">
+                    <button class="peek__main" id="peekCard">
+                      <span class="peek__icon"><svg viewBox="0 0 24 24"><use href="#i-spark"/></svg></span>
+                      <span class="peek__text">
+                        <b id="peekTitle">Что было до 1:16:38</b>
+                      </span>
+                      <svg class="peek__chev" viewBox="0 0 24 24"><use href="#i-chevron"/></svg>
+                    </button>
+                    <button class="peek__close" id="peekClose" aria-label="Скрыть">
+                      <svg class="peek__ring" viewBox="0 0 32 32" aria-hidden="true"><circle class="peek__ring-track" cx="16" cy="16" r="14"/><circle class="peek__ring-fill" id="peekRing" cx="16" cy="16" r="14"/></svg>
+                      <svg class="peek__x" viewBox="0 0 24 24"><use href="#i-close"/></svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div class="vinfo">
+                <h1 class="vinfo__title" id="vTitle"></h1>
+                <button class="vinfo__meta" id="vMetaBtn"><span id="vMeta"></span> <b>Ещё</b></button>
+              </div>
+              <div class="channel">
+                <div class="avatar avatar--ch" id="vChAvatar"></div>
+                <div class="channel__text">
+                  <div class="channel__name"><span id="vChName"></span><svg class="verified" viewBox="0 0 24 24"><use href="#i-verified"/></svg></div>
+                  <div class="channel__subs" id="vChSubs"></div>
+                </div>
+                <button class="btn btn--white">Подписаться</button>
+              </div>
+              <div class="actions">
+                <button class="action"><svg viewBox="0 0 24 24"><use href="#i-heart"/></svg><span id="vLikes">18,4K</span></button>
+                <button class="action"><svg viewBox="0 0 24 24"><use href="#i-share"/></svg></button>
+                <!-- НОВОЕ: вход в пересказ в родном ряду действий VK -->
+                <button class="action action--recap only-after" id="recapChip" aria-label="Пересказ просмотренного"><svg viewBox="0 0 24 24"><use href="#i-spark-outline"/></svg><span class="action__label">Пересказ</span></button>
+                <span class="actions__spacer"></span>
+                <button class="action"><svg viewBox="0 0 24 24"><use href="#i-download"/></svg></button>
+                <button class="action"><svg viewBox="0 0 24 24"><use href="#i-clock"/></svg></button>
+                <button class="action"><svg viewBox="0 0 24 24"><use href="#i-more"/></svg></button>
+              </div>
+              <div class="comments">
+                <div class="comments__head">Комментарии <span id="vComments">842</span></div>
+                <div class="comments__row"><div class="avatar avatar--xs" id="vCommentAv">М</div><p id="vComment"></p></div>
+              </div>
+              <div class="also">
+                <h2 class="also__title">Смотрите также</h2>
+                <div id="alsoList"></div>
+              </div>
+              <div class="scroll__pad"></div>
+            </div>
+
+            <!-- Панель глав: открывается нажатием на название главы в плеере. НОВОЕ: вкладка «✦ Пересказ» -->
+            <div class="sheet sheet--desc sheet--chapters" id="chSheet" role="dialog" aria-label="Главы видео">
+              <div class="sheet__handle"></div>
+              <div class="sheet__head">
+                <div class="ch-tabs" id="chTabs" role="tablist">
+                  <button role="tab" data-tab="chapters" class="is-on">Главы</button>
+                  <button role="tab" data-tab="recap" class="ch-tabs__recap only-after"><svg viewBox="0 0 24 24"><use href="#i-spark"/></svg>Пересказ</button>
+                </div>
+                <button class="icon-btn desc__close" id="chClose" aria-label="Закрыть"><svg viewBox="0 0 24 24"><use href="#i-close"/></svg></button>
+              </div>
+              <div class="desc__body" id="chBody"></div>
+            </div>
+
+            <!-- Шторка «Описание» — как в приложении: текст и кликабельные таймкоды -->
+            <div class="sheet sheet--desc" id="descSheet" role="dialog" aria-labelledby="descTitle">
+              <div class="sheet__handle"></div>
+              <div class="sheet__head">
+                <h2 class="desc__title" id="descTitle">Описание</h2>
+                <button class="icon-btn desc__close" id="descClose" aria-label="Закрыть"><svg viewBox="0 0 24 24"><use href="#i-close"/></svg></button>
+              </div>
+              <div class="desc__body" id="descBody"></div>
+            </div>
+
+            <!-- НОВОЕ: шторка пересказа -->
+            <div class="sheet-scrim" id="sheetScrim"></div>
+            <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+              <div class="sheet__handle"></div>
+              <!-- Шапка как у «Описания»: один заголовок слева, крестик справа, одна строка контекста -->
+              <div class="sheet__head">
+                <h2 class="sheet__title" id="sheetTitle"><svg class="sheet__spark" viewBox="0 0 24 24"><use href="#i-spark"/></svg>Что было раньше</h2>
+                <button class="icon-btn desc__close" id="sheetClose" aria-label="Закрыть"><svg viewBox="0 0 24 24"><use href="#i-close"/></svg></button>
+              </div>
+              <p class="sheet__sub" id="sheetSub">До&nbsp;1:16:38 · смотрели 3&nbsp;дня назад</p>
+
+              <div class="sheet__body" id="sheetBody"></div>
+
+              <div class="sheet__buttons">
+                <button class="btn btn--white btn--l" id="btnContinue">Продолжить с&nbsp;1:16:38</button>
+                <button class="btn-link" id="btnChapter">Смотреть главу с&nbsp;начала</button>
+              </div>
+              <div class="sheet__foot">
+                <button class="foot-info" id="recapInfo"><svg viewBox="0 0 24 24"><use href="#i-info"/></svg>Создано автоматически</button>
+                <span class="feedback"><span class="feedback__q">Полезно?</span>
+                  <button aria-label="Полезно" data-fb="up"><svg viewBox="0 0 24 24"><use href="#i-like"/></svg></button>
+                  <button aria-label="Неточно" data-fb="down"><svg viewBox="0 0 24 24"><use href="#i-dislike"/></svg></button>
+                </span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <div class="snackbar" id="snackbar" role="status"><span id="snackText"></span><button id="snackAction"></button></div>
+
+        <div class="home-indicator" aria-hidden="true"></div>
+      </div>
+    </div>
+    <button class="concept-pill" id="conceptPill"><span>Концепт для VK Видео</span><b>Как смотреть ›</b></button>
+  </main>
+  <!-- Масштаб телефона считается сразу, до первой отрисовки — без вспышки крупного телефона -->
+  <script>(function () {
+    var ph = document.getElementById('phone'), st = document.getElementById('stage');
+    if (!ph || innerWidth <= 760) return;
+    var w = st.getBoundingClientRect().width;
+    var k = Math.min(1, (innerHeight - 136) / ph.offsetHeight, (w - 48) / ph.offsetWidth);
+    ph.style.transform = 'scale(' + k + ')';
+  })();</script>
+
+  <!-- Иконки -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <linearGradient id="g-ai" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4EAFFF"/><stop offset=".5" stop-color="#B984ED"/><stop offset="1" stop-color="#FF4B9C"/></linearGradient>
+      <!-- Иконки: официальная библиотека VK @vkontakte/icons 3.81.0 (MIT) -->
+      <symbol id="i-bell" viewBox="0 0 28 28"><g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><g><rect x="0" y="0" width="28" height="28"></rect><path d="M14.0046028,3.5 C18.5358601,3.5 22,7.29406785 22,12.0814651 L21.9953979,13.9081084 C21.9958228,14.2153952 22.1945877,14.5706814 22.7335216,15.2049931 C22.8012144,15.2846658 22.8649419,15.3585239 23.0042724,15.5194663 C24.0744404,16.7576538 24.5,17.4744714 24.5,18.5882353 C24.5,19.0892946 24.4430332,19.4785282 24.2055926,19.9455699 C23.69956,20.9409276 22.6182188,21.5 21,21.5 L18.3988532,21.5006982 C17.7309515,23.7645264 16.2123212,24.9999999 14,24.9999999 C11.7876788,24.9999999 10.2690485,23.7645264 9.6011468,21.5006982 L7,21.5 C5.33483077,21.5 4.24202957,20.9258124 3.75797492,19.8962478 C3.54802005,19.4496823 3.5,19.0874607 3.5,18.5882353 C3.5,17.4749766 3.92475347,16.7581996 4.9928315,15.520155 C5.13190601,15.3592125 5.19551502,15.285356 5.26308201,15.205685 C5.80170622,14.5705706 6,14.215121 6,13.9071207 L6,12.0789474 C6,7.29571186 9.47202448,3.5 14.0046028,3.5 Z M16.2794024,21.5008013 L11.7205976,21.5008013 C12.1713889,22.5431725 12.8986588,23.0000001 14,23.0000001 C15.1013412,23.0000001 15.8286111,22.5431725 16.2794024,21.5008013 Z M14.0046028,5.5 C10.6183529,5.5 8,8.3624548 8,12.0789474 L8,13.9071207 C8,14.8348489 7.61560159,15.5238985 6.78840913,16.4992758 C6.71508593,16.5857342 6.64587176,16.6660989 6.5071685,16.8265942 C5.74712153,17.7075898 5.5,18.1246106 5.5,18.5882353 C5.5,18.8143528 5.51596919,18.9348106 5.56791451,19.0452961 C5.69184037,19.3088814 6.05557968,19.5 7,19.5 L21,19.5 C21.9142367,19.5 22.2862841,19.3076449 22.4227634,19.0391925 C22.4818467,18.9229767 22.5,18.7989414 22.5,18.5882353 C22.5,18.1251158 22.2524476,17.7081357 21.4911248,16.8272829 C21.3521661,16.6667875 21.2828259,16.5864244 21.2093691,16.4999676 C20.3805492,15.5244674 19.9953972,14.8353358 19.9953972,13.9071207 L20,12.0789474 C20,8.36007608 17.388633,5.5 14.0046028,5.5 Z" fill="currentColor" fill-rule="nonzero"></path></g></g></symbol>
+      <symbol id="i-gear" viewBox="0 0 28 28"><g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><g fill-rule="nonzero"><rect x="0" y="0" width="28" height="28"></rect><path d="M15.1480123,2.04074374 C15.5755544,2.10915048 15.9799903,2.27274253 16.3431401,2.56326238 C16.9380313,3.03917538 17.2213264,3.6390943 17.440285,4.51492875 C17.4963389,4.73914434 17.593329,5.00052458 17.7145515,5.25420891 C17.9926195,5.37242817 18.2646756,5.50383096 18.5298601,5.64789715 C18.7916136,5.58322866 19.0429929,5.49734188 19.2437275,5.40389237 C20.6559711,4.74643965 21.840713,4.78098291 22.810912,5.82743499 C22.8929739,5.9159466 22.941971,5.97458142 23.0485755,6.10622704 L23.6778959,6.883373 C23.8471459,7.09237932 23.9194483,7.18760885 24.0262155,7.36529764 C24.7180725,8.51673099 24.4482992,9.58908522 23.5738105,10.7510996 C23.4287142,10.9439025 23.2805641,11.1963043 23.1566296,11.4618362 C23.234813,11.7443748 23.2999255,12.0308759 23.3516777,12.3205887 C23.5744346,12.499037 23.8112044,12.6554046 24.020328,12.7621251 C24.8244599,13.1724917 25.3452754,13.5834783 25.6751694,14.2701797 C25.8765523,14.6893747 25.9449732,15.1202452 25.9154506,15.5522176 C25.8998459,15.7805458 25.8751715,15.9078085 25.8093791,16.1927867 L25.584428,17.1671567 C25.5186356,17.4521349 25.4850245,17.5773344 25.3989575,17.7893951 C25.236128,18.1905912 24.9857505,18.5478612 24.6209857,18.8363508 C24.0234489,19.3089379 23.3751784,19.4500197 22.4725365,19.4663465 C22.2442027,19.4704766 21.9713526,19.5054091 21.6999312,19.5651972 C21.523462,19.809022 21.3355319,20.0443479 21.1368338,20.2703621 C21.1402402,20.5445584 21.1674942,20.8140308 21.21419,21.0344025 C21.4013318,21.9175824 21.4096951,22.5809743 21.0836369,23.2695052 C20.8845955,23.6898172 20.592805,24.0141458 20.2385202,24.2630515 C20.0512554,24.3946159 19.9368256,24.4555293 19.6739515,24.5837416 L18.7751575,25.0221127 C18.5122834,25.150325 18.3938329,25.2029948 18.174867,25.2695623 C17.7606072,25.3955009 17.3253886,25.4257584 16.8716362,25.3238353 C16.1283249,25.1568707 15.6107139,24.7418555 15.0299746,24.0506458 C14.8764629,23.8679325 14.666696,23.6690715 14.4386231,23.4900155 C14.2928169,23.4966652 14.1465814,23.5 14,23.5 C13.8534186,23.5 13.7071831,23.4966652 13.5613769,23.4900155 C13.333304,23.6690715 13.1235371,23.8679325 12.9700254,24.0506458 C12.3892861,24.7418555 11.8716751,25.1568707 11.1283638,25.3238353 C10.6746114,25.4257584 10.2393928,25.3955009 9.82513296,25.2695623 C9.60616706,25.2029948 9.48771663,25.150325 9.22484252,25.0221127 L8.32604848,24.5837416 C8.24702677,24.5452709 8.19801021,24.5209844 8.14075277,24.4911677 C6.8292028,23.8081792 6.44471312,22.6441436 6.78581002,21.0344025 C6.83250579,20.8140308 6.85975979,20.5445584 6.86316617,20.2703621 C6.66446808,20.0443479 6.47653801,19.809022 6.30006883,19.5651972 C6.02864736,19.5054091 5.75579729,19.4704766 5.52746347,19.4663465 C4.62482163,19.4500197 3.97655107,19.3089379 3.37901428,18.8363508 C3.0142495,18.5478612 2.76387202,18.1905912 2.60104249,17.7893951 C2.51497546,17.5773344 2.48136436,17.4521349 2.41557197,17.1671567 L2.19062092,16.1927867 C2.12096477,15.8910728 2.09530369,15.7565206 2.08209042,15.5120465 C2.05732004,15.053741 2.14502416,14.5984123 2.3776563,14.1664301 C2.71660439,13.5370263 3.21830349,13.1506686 3.97967199,12.7621251 C4.18879563,12.6554046 4.42556542,12.499037 4.64832231,12.3205887 C4.70007448,12.0308759 4.76518695,11.7443748 4.84337042,11.4618362 C4.71943592,11.1963043 4.5712858,10.9439025 4.42618951,10.7510996 C3.5517008,9.58908522 3.28192751,8.51673099 3.97378453,7.36529764 C4.08055167,7.18760885 4.15285412,7.09237932 4.3221041,6.883373 L4.95142449,6.10622704 C5.05802901,5.97458142 5.10702613,5.9159466 5.18908804,5.82743499 C6.15928699,4.78098291 7.34402894,4.74643965 8.75627252,5.40389237 C8.95700705,5.49734188 9.20838638,5.58322866 9.47013989,5.64789715 C9.73532438,5.50383096 10.0073805,5.37242817 10.2854485,5.25420891 C10.406671,5.00052458 10.5036611,4.73914434 10.559715,4.51492875 C10.7786736,3.6390943 11.0619687,3.03917538 11.6568599,2.56326238 C12.0200097,2.27274253 12.4244456,2.10915048 12.8519877,2.04074374 C13.032777,2.01181746 13.1518478,2.00309724 13.3419913,2.0007662 L14.5,2 C14.7924742,2 14.9220257,2.00458589 15.1480123,2.04074374 Z M14.585691,4.00020354 L13.5,4 C13,4 12.75,4 12.5,5 C12.3612322,5.55507136 12.0684122,6.26419483 11.6642951,6.87084066 C11.0217099,7.08123793 10.4173658,7.37609281 9.86438385,7.74228441 C9.14762015,7.67166339 8.42429968,7.45545202 7.91218277,7.21704225 C6.97770671,6.78200835 6.82037661,6.97629484 6.50571641,7.36486782 L5.87639602,8.14201378 C5.56173583,8.53058676 5.40440573,8.72487325 6.02422159,9.54848014 C6.37307911,10.0120395 6.74535143,10.6983758 6.9612408,11.4045337 C6.74017617,12.0038451 6.59346671,12.6391528 6.53230345,13.2992655 C6.03068735,13.8335281 5.40134246,14.2819913 4.88878006,14.5435634 C3.97064776,15.012107 4.02688552,15.2556995 4.13936105,15.7428845 L4.3643121,16.7172546 C4.47678763,17.2044396 4.53302539,17.4480322 5.56363322,17.4666736 C6.13345667,17.4769805 6.88659564,17.6018356 7.56651129,17.8570989 C7.9118453,18.4318656 8.33202244,18.9565458 8.81356234,19.4176592 C8.90791525,20.1351985 8.86006774,20.8935264 8.74236787,21.4489883 C8.52869524,22.4573751 8.75339375,22.5669679 9.20279077,22.7861535 L10.1015848,23.2245246 C10.5509818,23.4437102 10.7756804,23.553303 11.43875,22.7641017 C11.8105483,22.3215785 12.3925558,21.8066745 13.0292334,21.4377508 C13.3470161,21.4788205 13.6710347,21.5 14,21.5 C14.3289653,21.5 14.6529839,21.4788205 14.9707666,21.4377508 C15.6074442,21.8066745 16.1894517,22.3215785 16.56125,22.7641017 C17.2243196,23.553303 17.4490182,23.4437102 17.8984152,23.2245246 L18.7972092,22.7861535 C19.2466063,22.5669679 19.4713048,22.4573751 19.2576321,21.4489883 C19.1399323,20.8935264 19.0920847,20.1351985 19.1864377,19.4176592 C19.6679776,18.9565458 20.0881547,18.4318656 20.4334887,17.8570989 C21.1134044,17.6018356 21.8665433,17.4769805 22.4363668,17.4666736 C23.4669746,17.4480322 23.5232124,17.2044396 23.6356879,16.7172546 L23.860639,15.7428845 C23.9731145,15.2556995 24.0293522,15.012107 23.1112199,14.5435634 C22.5986575,14.2819913 21.9693127,13.8335281 21.4676965,13.2992655 C21.4065333,12.6391528 21.2598238,12.0038451 21.0387592,11.4045337 C21.2546486,10.6983758 21.6269209,10.0120395 21.9757784,9.54848014 C22.5955943,8.72487325 22.4382642,8.53058676 22.123604,8.14201378 L21.4942836,7.36486782 C21.1796234,6.97629484 21.0222933,6.78200835 20.0878172,7.21704225 C19.5757003,7.45545202 18.8523799,7.67166339 18.1356162,7.74228441 C17.5826342,7.37609281 16.9782901,7.08123793 16.3357049,6.87084066 C15.9315878,6.26419483 15.6387678,5.55507136 15.5,5 C15.2647059,4.05882353 15.0294118,4.00346021 14.585691,4.00020354 Z M14,9.5 C16.4852814,9.5 18.5,11.5147186 18.5,14 C18.5,16.4852814 16.4852814,18.5 14,18.5 C11.5147186,18.5 9.5,16.4852814 9.5,14 C9.5,11.5147186 11.5147186,9.5 14,9.5 Z M14,11.5 C12.6192881,11.5 11.5,12.6192881 11.5,14 C11.5,15.3807119 12.6192881,16.5 14,16.5 C15.3807119,16.5 16.5,15.3807119 16.5,14 C16.5,12.6192881 15.3807119,11.5 14,11.5 Z" fill="currentColor"></path></g></g></symbol>
+      <symbol id="i-play-square" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M7 8.6c0-1.96 0-2.94.381-3.689a3.5 3.5 0 0 1 1.53-1.53C9.66 3 10.64 3 12.6 3h1.36c2.464 0 3.696 0 4.638.48a4.4 4.4 0 0 1 1.922 1.922c.48.942.48 2.174.48 4.638v3.92c0 2.464 0 3.696-.48 4.638a4.4 4.4 0 0 1-1.922 1.922c-.942.48-2.174.48-4.638.48H12.6c-1.96 0-2.94 0-3.689-.381a3.5 3.5 0 0 1-1.53-1.53C7 18.34 7 17.36 7 15.4V8.6Zm9.265 1.744c.901.539 1.352.808 1.505 1.157.133.304.133.65 0 .954-.153.349-.604.618-1.505 1.157l-2.386 1.425c-.943.563-1.414.844-1.802.807a1.19 1.19 0 0 1-.847-.48C11 15.05 11 14.5 11 13.403v-2.85c0-1.098 0-1.647.23-1.96.201-.274.51-.45.847-.481.388-.037.86.244 1.802.807l2.386 1.425ZM5 9.04c0-2.464 0-3.696.48-4.638a4.4 4.4 0 0 1 .955-1.253 3.652 3.652 0 0 0-1.033.33A4.4 4.4 0 0 0 3.48 5.403C3 6.344 3 7.576 3 10.04v3.92c0 2.464 0 3.696.48 4.638a4.4 4.4 0 0 0 1.922 1.922c.304.155.637.26 1.033.33a4.4 4.4 0 0 1-.955-1.252C5 18.656 5 17.424 5 14.96V9.04Z" clip-rule="evenodd"/></symbol>
+      <symbol id="i-home" viewBox="0 0 28 28"><path fill-rule="evenodd" d="M12.246 11.024a.354.354 0 0 0-.479.25 13.693 13.693 0 0 0-.267 2.7c0 .944.096 1.864.278 2.752.039.19.244.333.48.25a13.992 13.992 0 0 0 4.625-2.728.317.317 0 0 0 0-.492 13.99 13.99 0 0 0-4.637-2.732Zm.665-1.886c-1.362-.48-2.823.34-3.105 1.743a15.765 15.765 0 0 0 .013 6.247c.287 1.4 1.746 2.214 3.105 1.733a15.993 15.993 0 0 0 5.287-3.118 2.316 2.316 0 0 0 0-3.483 15.993 15.993 0 0 0-5.3-3.122Z M6.07 3.801C7.164 3.216 8.243 3 10.691 3h6.616c2.448 0 3.527.216 4.622.801A5.465 5.465 0 0 1 24.2 6.07c.585 1.096.801 2.175.801 4.623v6.616c0 2.448-.216 3.527-.801 4.622a5.465 5.465 0 0 1-2.27 2.269c-1.095.585-2.174.801-4.622.801h-6.616c-2.448 0-3.527-.216-4.623-.801a5.465 5.465 0 0 1-2.268-2.269C3.216 20.835 3 19.756 3 17.308v-6.616c0-2.448.216-3.527.801-4.623A5.466 5.466 0 0 1 6.07 3.801ZM10.691 5c-2.335 0-3.019.212-3.68.565a3.466 3.466 0 0 0-1.447 1.448C5.212 7.673 5 8.357 5 10.692v6.616c0 2.335.212 3.019.565 3.68a3.466 3.466 0 0 0 1.448 1.447c.66.353 1.344.565 3.679.565h6.616c2.335 0 3.019-.212 3.68-.565a3.467 3.467 0 0 0 1.447-1.448c.353-.66.565-1.344.565-3.679v-6.616c0-2.335-.212-3.019-.565-3.68a3.466 3.466 0 0 0-1.448-1.447C20.327 5.212 19.643 5 17.308 5h-6.616Z" clip-rule="evenodd"/></symbol>
+      <symbol id="i-clips" viewBox="0 0 28 28"><path fill-rule="evenodd" d="M10.183 2.53a1.1 1.1 0 0 1 1.178 1.016l.414 5.598a1.1 1.1 0 1 1-2.194.162l-.414-5.598a1.1 1.1 0 0 1 1.016-1.178Zm8.634 10.381a1 1 0 0 1 1.397-.22c1.203.877 1.886 2.277 2.152 3.696.266 1.425.138 2.987-.41 4.318-1.174 2.85-4.15 4.479-7.141 4.753-3.013.276-6.318-.793-8.207-3.676-1.911-2.917-1.142-5.88.731-7.408.92-.75 2.119-1.156 3.348-.975 1.25.185 2.396.956 3.23 2.305a1 1 0 0 1-1.701 1.051c-.572-.925-1.24-1.291-1.821-1.377-.601-.089-1.247.102-1.791.546-1.055.86-1.691 2.674-.323 4.762 1.39 2.121 3.887 3.006 6.351 2.78 2.487-.228 4.665-1.556 5.475-3.523.389-.944.494-2.11.293-3.188-.203-1.084-.692-1.958-1.363-2.447a1 1 0 0 1-.22-1.397Zm.023-8.529a1.1 1.1 0 0 0-2.118-.595l-1.755 6.25a1.1 1.1 0 0 0 2.118.594l1.755-6.249Z" clip-rule="evenodd"/></symbol>
+      <symbol id="i-create" viewBox="0 0 28 28"><path fill-rule="evenodd" d="M23 3a1 1 0 1 0-2 0v2h-2a1 1 0 1 0 0 2h2v2a1 1 0 1 0 2 0V7h2a1 1 0 1 0 0-2h-2V3Zm-16.93.801C7.164 3.216 8.243 3 10.691 3H15.5a1 1 0 1 1 0 2h-4.808c-2.335 0-3.019.212-3.68.565a3.466 3.466 0 0 0-1.447 1.448C5.212 7.673 5 8.357 5 10.692v6.616c0 2.335.212 3.019.565 3.68a3.466 3.466 0 0 0 1.448 1.447c.66.353 1.344.565 3.679.565h6.616c2.335 0 3.019-.212 3.68-.565a3.467 3.467 0 0 0 1.447-1.448c.353-.66.565-1.344.565-3.679V12.5a1 1 0 1 1 2 0v4.808c0 2.448-.216 3.527-.801 4.622a5.465 5.465 0 0 1-2.269 2.27c-1.095.585-2.174.801-4.622.801h-6.616c-2.448 0-3.527-.216-4.623-.801a5.465 5.465 0 0 1-2.268-2.269C3.216 20.835 3 19.756 3 17.308v-6.616c0-2.448.216-3.527.801-4.623A5.466 5.466 0 0 1 6.07 3.801Zm6.176 7.223a.354.354 0 0 0-.479.25 13.693 13.693 0 0 0-.267 2.7c0 .944.096 1.864.278 2.752.039.19.244.333.48.25a13.992 13.992 0 0 0 4.625-2.728.317.317 0 0 0 0-.492 13.99 13.99 0 0 0-4.637-2.732Zm.665-1.886c-1.362-.48-2.823.34-3.105 1.743a15.765 15.765 0 0 0 .013 6.247c.287 1.4 1.746 2.214 3.105 1.733a15.993 15.993 0 0 0 5.287-3.118 2.316 2.316 0 0 0 0-3.483 15.993 15.993 0 0 0-5.3-3.122Z" clip-rule="evenodd"/></symbol>
+      <symbol id="i-subs" viewBox="0 0 24 24"><path fill="currentColor" d="M3.9 6.9h14.2A.9.9 0 0 0 19 6a.9.9 0 0 0-.9-.9H3.9a.9.9 0 1 0 0 1.8Zm0 3.2a.9.9 0 0 0 0 1.8h14.2a.9.9 0 0 0 0-1.8H3.9ZM3 16a.9.9 0 0 1 .9-.9h5.2a.9.9 0 0 1 0 1.8H3.9A.9.9 0 0 1 3 16Zm19.7234-2.3095c.3813-.3995.3666-1.0325-.0329-1.4139-.3995-.3813-1.0325-.3666-1.4139.0329l-5.0039 5.2422-2.5493-2.6707c-.3814-.3995-1.0144-.4143-1.4139-.0329-.3995.3813-.4142 1.0143-.0329 1.4138l3.2728 3.4286a.9998.9998 0 0 0 1.4467 0l5.7273-6Z"/></symbol>
+      <symbol id="i-me" viewBox="0 0 28 28"><g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><g><polygon points="0 0 28 0 28 28 0 28"></polygon><path d="M14,2 C20.627417,2 26,7.372583 26,14 C26,20.627417 20.627417,26 14,26 C7.372583,26 2,20.627417 2,14 C2,7.372583 7.372583,2 14,2 Z M14,20.5 C11.9140585,20.5 9.92003841,21.0819877 8.20321268,22.1490263 C9.83817315,23.3145604 11.8390401,24 14,24 C16.1605163,24 18.1610053,23.3148418 19.7960379,22.1499545 C18.0794784,21.0818382 16.0856823,20.5 14,20.5 Z M14,4 C8.4771525,4 4,8.4771525 4,14 C4,16.6156772 5.00425519,18.9967981 6.64822833,20.7788253 C8.78562177,19.3081977 11.3309834,18.5 14,18.5 C16.6692926,18.5 19.214928,19.3083599 21.3526704,20.7774111 C22.9961172,18.995915 24,16.6151922 24,14 C24,8.4771525 19.5228475,4 14,4 Z M14,7.5 C16.6241597,7.5 18.75,9.62584025 18.75,12.25 C18.75,14.8741597 16.6241597,17 14,17 C11.3758403,17 9.25,14.8741597 9.25,12.25 C9.25,9.62584025 11.3758403,7.5 14,7.5 Z M14,9.5 C12.4804097,9.5 11.25,10.7304097 11.25,12.25 C11.25,13.7695903 12.4804097,15 14,15 C15.5195903,15 16.75,13.7695903 16.75,12.25 C16.75,10.7304097 15.5195903,9.5 14,9.5 Z" fill="currentColor" fill-rule="nonzero"></path></g></g></symbol>
+      <symbol id="i-close" viewBox="0 0 24 24"><path d="M7.536 6.264a.9.9 0 0 0-1.272 1.272L10.727 12l-4.463 4.464a.9.9 0 0 0 1.272 1.272L12 13.273l4.464 4.463a.9.9 0 1 0 1.272-1.272L13.273 12l4.463-4.464a.9.9 0 1 0-1.272-1.272L12 10.727 7.536 6.264Z"/></symbol>
+      <symbol id="i-back" viewBox="0 0 28 28"><g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><g><polygon points="28 0 0 0 0 28 28 28"></polygon><path d="M12.292893,6.292893 C12.6834173,5.90236871 13.3165827,5.90236871 13.707107,6.292893 C14.0976313,6.68341729 14.0976313,7.31658271 13.707107,7.707107 L13.707107,7.707107 L8.414,12.9999998 L22,13 C22.5128358,13 22.9355072,13.3860402 22.9932723,13.8833789 L23,14 C23,14.5522847 22.5522847,15 22,15 L22,15 L8.414,14.9999998 L13.707107,20.292893 C14.067591,20.653377 14.0953205,21.2206084 13.7902956,21.6128997 L13.707107,21.707107 C13.3165827,22.0976313 12.6834173,22.0976313 12.292893,21.707107 L12.292893,21.707107 L5.29289322,14.7071068 L5.29289322,14.7071068 L5.21968877,14.625449 C5.2173721,14.6225624 5.21507113,14.6196628 5.21278596,14.6167501 C5.20728448,14.6098424 5.20175344,14.602603 5.19633458,14.5953066 C5.17849009,14.5711307 5.1617187,14.546275 5.14606743,14.5206602 C5.13860692,14.5086131 5.13149883,14.4963944 5.12467117,14.4840621 C5.11379392,14.4642939 5.10337664,14.4438914 5.09365378,14.4230991 C5.08567905,14.4060985 5.07819642,14.3887956 5.07122549,14.371336 C5.06331574,14.3515792 5.05612249,14.3317977 5.04954668,14.3117364 C5.04472872,14.2968513 5.04009773,14.2814633 5.03584514,14.265993 C5.02983363,14.2444365 5.0246398,14.2227461 5.02016515,14.2007941 C5.01670217,14.1833753 5.01362808,14.165949 5.0110178,14.1484669 C5.00376119,14.1003621 5,14.0506203 5,14 L5.00396641,14.0892501 C5.00189498,14.0659949 5.00063489,14.042681 5.00018615,14.0193545 L5,14 C5,13.9935938 5.00006024,13.9872016 5.00018018,13.980824 C5.00059932,13.9579802 5.0018656,13.9343349 5.00396641,13.9107499 C5.00576612,13.890153 5.00811223,13.8705042 5.01101934,13.8510388 C5.01362808,13.834051 5.01670217,13.8166247 5.02024007,13.7992742 C5.0246398,13.7772539 5.02983363,13.7555635 5.03572097,13.7341604 C5.04009773,13.7185367 5.04472872,13.7031487 5.04973809,13.6878575 C5.05612249,13.6682023 5.06331574,13.6484208 5.07110396,13.6289415 C5.07819642,13.6112044 5.08567905,13.5939015 5.09367336,13.5767785 C5.10337664,13.5561086 5.11379392,13.5357061 5.12487577,13.515723 C5.13149883,13.5036056 5.13860692,13.4913869 5.14599545,13.4792912 C5.1617187,13.453725 5.17849009,13.4288693 5.19631351,13.4048407 C5.22531295,13.3656744 5.25749917,13.3282873 5.29289322,13.2928932 L5.21278596,13.3832499 C5.23766884,13.3515341 5.26442691,13.3213595 5.29289322,13.2928932 Z" fill="currentColor" fill-rule="nonzero"></path></g></g></symbol>
+      <symbol id="i-pause" viewBox="0 0 28 28"><g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><g><rect x="0" y="0" width="28" height="28"></rect><path d="M7.29999995,5 L10.7,5 C11.4179702,5 12,5.5820298 12,6.29999995 L12,21.7 C12,22.4179702 11.4179702,23 10.7,23 L7.29999995,23 C6.5820298,23 6,22.4179702 6,21.7 L6,6.29999995 C6,5.5820298 6.5820298,5 7.29999995,5 Z M16.3,5 L19.7,5 C20.4179702,5 21,5.5820298 21,6.29999995 L21,21.7 C21,22.4179702 20.4179702,23 19.7,23 L16.3,23 C15.5820298,23 15,22.4179702 15,21.7 L15,6.29999995 C15,5.5820298 15.5820298,5 16.3,5 Z" fill="currentColor"></path></g></g></symbol>
+      <symbol id="i-play" viewBox="0 0 28 28"><path d="M21.65 11.923c1.181.682 1.772 1.023 1.97 1.467.173.388.173.832 0 1.22-.198.444-.789.785-1.97 1.467L11.6 21.874c-1.181.681-1.772 1.022-2.257.971a1.5 1.5 0 0 1-1.057-.61C8 21.842 8 21.16 8 19.797V8.203c0-1.363 0-2.044.286-2.438a1.5 1.5 0 0 1 1.057-.61c.485-.05 1.076.29 2.257.971l10.05 5.797Z"/></symbol>
+      <symbol id="i-cast" viewBox="0 0 28 28"><path fill="currentColor" d="M17.0438 4h-6.0876c-1.363 0-2.447 0-3.3216.0714-.8956.0732-1.6593.2263-2.3585.5826A6 6 0 0 0 2.654 7.276c-.246.4827-.395.9954-.4878 1.5622-.0894.545.28 1.0593.825 1.1486.545.0894 1.0593-.28 1.1486-.825.0684-.4173.1658-.722.2962-.9778a4 4 0 0 1 1.748-1.748c.3704-.1887.8415-.3081 1.6134-.3712C8.581 6.0008 9.5834 6 11 6h6c1.4166 0 2.419.0008 3.2026.0648.7719.063 1.2431.1825 1.6134.3712a4.0002 4.0002 0 0 1 1.748 1.748c.1887.3704.3081.8415.3712 1.6134.064.7836.0648 1.786.0648 3.2026v2c0 1.4166-.0008 2.419-.0648 3.2026-.0631.7719-.1825 1.2431-.3712 1.6134a4.0003 4.0003 0 0 1-1.748 1.748c-.3703.1887-.8415.3081-1.6134.3712C19.419 21.9992 18.4166 22 17 22c-.5523 0-1 .4477-1 1s.4477 1 1 1h.0438c1.363 0 2.4471 0 3.3216-.0714.8956-.0732 1.6593-.2263 2.3585-.5826a5.9993 5.9993 0 0 0 2.6221-2.6221c.3563-.6992.5094-1.4629.5826-2.3585C26 17.4909 26 16.4069 26 15.0439v-2.0877c0-1.363 0-2.4471-.0714-3.3216-.0732-.8956-.2263-1.6593-.5826-2.3585a5.9997 5.9997 0 0 0-2.6221-2.6221c-.6992-.3563-1.4629-.5094-2.3585-.5826C19.4908 4 18.4068 4 17.0438 4ZM6 22c0 1.1046-.8954 2-2 2s-2-.8954-2-2 .8954-2 2-2 2 .8954 2 2Z"/><path fill="currentColor" d="M4 18a4.029 4.029 0 0 0-.801.08c-.5413.1099-1.0692-.2398-1.179-.781-.11-.5413.2397-1.0691.781-1.179A6.0245 6.0245 0 0 1 4 16c3.3138 0 6.0001 2.6863 6.0001 6 0 .4097-.0412.8107-.12 1.1989-.11.5413-.6378.891-1.179.7811s-.891-.6377-.781-1.1789c.0523-.258.08-.5258.08-.8011 0-2.2091-1.7909-4-4-4Z"/><path fill="currentColor" d="M3.1097 14.0489a8.0898 8.0898 0 0 1 .89-.0489c4.4183 0 8 3.5817 8 8a8.116 8.116 0 0 1-.0488.8901c-.0607.549.3351 1.0432.884 1.1038.549.0607 1.0432-.3351 1.1039-.884.0403-.3648.0609-.7351.0609-1.1099 0-5.5228-4.4771-10-10-10-.3747 0-.745.0207-1.1097.061-.549.0606-.9448.5548-.8841 1.1038.0607.5489.5549.9447 1.1038.8841Z"/></symbol>
+      <symbol id="i-full" viewBox="0 0 28 28"><path d="M4.502 22.476a.997.997 0 0 0 1 1.022H10.5a1 1 0 1 0 0-2H7.916l4.292-4.292a1 1 0 0 0-1.414-1.414l-4.292 4.292v-2.586a1 1 0 1 0-2 0v4.978ZM22.495 4.502h-4.997a1 1 0 1 0 0 2h2.583l-4.291 4.29a1 1 0 1 0 1.414 1.415l4.291-4.291v2.586a1 1 0 1 0 2 0v-5a.997.997 0 0 0-.355-.765.997.997 0 0 0-.645-.235Z"/></symbol>
+      <symbol id="i-heart" viewBox="0 0 28 28"><g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><g><polygon points="0 0 28 0 28 28 0 28"></polygon><path d="M9.02631579,4.88 C5.42193111,4.88 2.5,7.80193111 2.5,11.4063158 C2.5,15.0191061 3.94497846,16.8273664 9.99322968,21.5315618 L12.7721188,23.69292 C13.4943397,24.2546474 14.5056603,24.2546474 15.2278812,23.69292 L18.0067703,21.5315618 C24.0550215,16.8273664 25.5,15.0191061 25.5,11.4063158 C25.5,7.80193111 22.5780689,4.88 18.9736842,4.88 C17.1021743,4.88 15.4359157,5.73037017 14,7.36654489 C12.5640843,5.73037017 10.8978257,4.88 9.02631579,4.88 Z M9.02631579,6.88 C10.5454982,6.88 11.914878,7.73751701 13.1775126,9.56334572 L13.3831345,9.86068453 C13.6187323,10.20137 14.0859021,10.2865603 14.4265875,10.0509625 C14.5009662,9.99952663 14.5654296,9.93506325 14.6168655,9.86068453 L14.8224874,9.56334572 L14.8224874,9.56334572 C16.085122,7.73751701 17.4545018,6.88 18.9736842,6.88 C21.4734994,6.88 23.5,8.90650061 23.5,11.4063158 C23.5,14.1865911 22.3625441,15.6100146 16.7788891,19.9528574 L14,22.1142156 L11.2211109,19.9528574 C5.63745588,15.6100146 4.5,14.1865911 4.5,11.4063158 C4.5,8.90650061 6.52650061,6.88 9.02631579,6.88 Z" fill="currentColor" fill-rule="nonzero"></path></g></g></symbol>
+      <symbol id="i-share" viewBox="0 0 28 28"><path clip-rule="evenodd" d="m13.4755 6.51266c0-.44167.4854-.65067.7971-.40594l9.5321 7.48368c.2604.2044.2604.6075 0 .8119l-9.5321 7.4837c-.3117.2447-.7971.0357-.7971-.4059v-4.4848c0-.5521-.4477-.9997-1-.9997-3.56486 0-6.25118 1.4484-8.25863 3.2666.36088-2.1616 1.15234-3.8067 2.22404-5.0458 1.49731-1.7312 3.63669-2.7798 6.21929-3.2648.4728-.0888.8153-.5016.8153-.9825zm2.0324-1.97826c-1.6538-1.29839-4.0324-.09353-4.0324 1.97826v2.64707c-2.56424.6094-4.85357 1.79057-6.54753 3.74907-1.87682 2.17-2.92797 5.1847-2.92797 9.1421 0 .4266.27078.8061.67422.9451s.85064.0067 1.11351-.3293c1.74124-2.2258 4.17502-4.2919 7.68777-4.6251v3.4385c0 2.0718 2.3786 3.2766 4.0324 1.9782l9.5322-7.4837c1.2799-1.0048 1.2799-2.9516 0-3.9565z" fill="currentColor" fill-rule="evenodd"/></symbol>
+      <symbol id="i-download" viewBox="0 0 28 28"><g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><g><polygon points="0 0 28 0 28 28 0 28"></polygon><path d="M21,22 C21.5522847,22 22,22.4477152 22,23 C22,23.5522847 21.5522847,24 21,24 L7,24 C6.44771525,24 6,23.5522847 6,23 C6,22.4477152 6.44771525,22 7,22 L21,22 Z M14,2 C14.5522847,2 15,2.44771525 15,3 L15,16.585 L20.2928932,11.2928932 C20.6834175,10.9023689 21.3165825,10.9023689 21.7071068,11.2928932 C22.0976311,11.6834175 22.0976311,12.3165825 21.7071068,12.7071068 L14.7071068,19.7071068 C14.3165825,20.0976311 13.6834175,20.0976311 13.2928932,19.7071068 L6.29289322,12.7071068 C5.90236893,12.3165825 5.90236893,11.6834175 6.29289322,11.2928932 C6.68341751,10.9023689 7.31658249,10.9023689 7.70710678,11.2928932 L13,16.585 L13,3 C13,2.44771525 13.4477153,2 14,2 Z" fill="currentColor" fill-rule="nonzero"></path></g></g></symbol>
+      <symbol id="i-clock" viewBox="0 0 28 28"><path fill="currentColor" d="M14 2c6.6258 0 12 5.3723 12 12s-5.3742 12-12 12C7.3723 26 2 20.6277 2 14S7.3723 2 14 2Zm0 2C8.4769 4 4 8.4769 4 14s4.4769 10 10 10c5.522 0 10-4.4776 10-10S19.522 4 14 4Zm-.5 4c.5523 0 1 .4478 1 1v5.1037l4.8746 1.9692c.512.2069.7595.7897.5526 1.3018-.2069.512-.7897.7595-1.3018.5526l-5.5-2.2219a1 1 0 0 1-.6254-.9272V9.0001c0-.5523.4477-1 1-1Z"/></symbol>
+      <symbol id="i-more" viewBox="0 0 28 28"><path d="m16.25 7c0 1.24264-1.0074 2.25-2.25 2.25s-2.25-1.00736-2.25-2.25 1.0074-2.25 2.25-2.25 2.25 1.00736 2.25 2.25zm0 7c0 1.2426-1.0074 2.25-2.25 2.25s-2.25-1.0074-2.25-2.25 1.0074-2.25 2.25-2.25 2.25 1.0074 2.25 2.25zm0 7c0 1.2426-1.0074 2.25-2.25 2.25s-2.25-1.0074-2.25-2.25 1.0074-2.25 2.25-2.25 2.25 1.0074 2.25 2.25z" fill="currentColor"/></symbol>
+      <symbol id="i-verified" viewBox="0 0 16 16"><path d="M4.5 9.586 2.957 8.043a1 1 0 0 0-1.414 1.414l2.25 2.25a1 1 0 0 0 1.414 0l5.25-5.25a1 1 0 0 0-1.414-1.414z"/></symbol>
+      <!-- ИИ-знак VK: искры из @vkontakte/icons (sparkles_12, как в sparkles_circle_fill_ai_gradient) -->
+      <symbol id="i-spark" viewBox="-0.5 -0.5 13 13"><path d="M2.803.218a.319.319 0 0 0-.606 0l-.242.728c-.159.476-.533.85-1.009 1.009l-.728.242a.319.319 0 0 0 0 .606l.728.242c.476.159.85.533 1.009 1.009l.242.728a.32.32 0 0 0 .606 0l.242-.728c.159-.476.533-.85 1.009-1.009l.728-.242a.319.319 0 0 0 0-.606l-.728-.242A1.6 1.6 0 0 1 3.045.946z"/><path fill-rule="evenodd" d="M6.436 3.472c-.256.746-.599 1.5-1.031 1.933-.433.432-1.187.775-1.933 1.03a12 12 0 0 1-.768.237c-.272.075-.272.58 0 .656a15 15 0 0 1 .768.236c.746.256 1.5.599 1.933 1.031.432.433.775 1.187 1.03 1.933a13 13 0 0 1 .237.768c.075.272.58.272.656 0a15 15 0 0 1 .236-.768c.256-.746.599-1.5 1.031-1.933.433-.432 1.187-.775 1.933-1.03a13 13 0 0 1 .768-.237c.272-.075.272-.58 0-.656a15 15 0 0 1-.768-.236c-.746-.256-1.5-.599-1.933-1.031-.432-.433-.775-1.187-1.03-1.933a12 12 0 0 1-.237-.768c-.075-.272-.58-.272-.656 0a15 15 0 0 1-.236.768" clip-rule="evenodd"/></symbol>
+      <symbol id="i-resume" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 7.1a.9.9 0 0 1 .9.9v3.727l2.236 2.237a.9.9 0 0 1-1.272 1.272l-2.5-2.5a.9.9 0 0 1-.264-.636V8a.9.9 0 0 1 .9-.9Z" clip-rule="evenodd"/><path d="M19 5a9.872 9.872 0 0 0-7-2.9 9.873 9.873 0 0 0-7.1 3V3a.9.9 0 0 0-1.8 0v4a.9.9 0 0 0 .9.9h4a.9.9 0 0 0 0-1.8H6.45A8.069 8.069 0 0 1 12 3.9c2.237 0 4.26.906 5.727 2.372A8.072 8.072 0 0 1 20.1 12a8.07 8.07 0 0 1-2.373 5.727A8.072 8.072 0 0 1 12 20.1a8.064 8.064 0 0 1-5.203-1.891.9.9 0 1 0-1.156 1.379A9.864 9.864 0 0 0 12 21.9c2.733 0 5.21-1.11 7-2.9a9.872 9.872 0 0 0 2.9-7c0-2.734-1.11-5.21-2.9-7Z"/></symbol>
+      <symbol id="i-like" viewBox="0 0 24 24"><path d="M3.9 21a.9.9 0 0 0 .9-.9V9.9a.9.9 0 0 0-1.8 0v10.2a.9.9 0 0 0 .9.9Z M11.133 2c-1.1 0-2.102.629-2.58 1.618L6.489 7.883A4.9 4.9 0 0 0 6 10.017V17.1A3.9 3.9 0 0 0 9.9 21h5.91a3.9 3.9 0 0 0 3.659-2.55l2.287-6.2C22.694 9.703 20.81 7 18.095 7H14V4.867A2.867 2.867 0 0 0 11.133 2Zm-.96 2.402a1.067 1.067 0 0 1 2.027.465v2.739c0 .66.535 1.194 1.194 1.194h4.702a2.1 2.1 0 0 1 1.97 2.827l-2.287 6.2a2.1 2.1 0 0 1-1.97 1.373h-5.91a2.1 2.1 0 0 1-2.1-2.1v-7.083c0-.468.107-.93.31-1.35l2.064-4.265Z" clip-rule="evenodd"/></symbol>
+      <symbol id="i-dislike" viewBox="0 0 24 24"><path d="M20.1 3a.9.9 0 0 0-.9.9v10.2a.9.9 0 1 0 1.8 0V3.9a.9.9 0 0 0-.9-.9Z M12.867 22a2.867 2.867 0 0 0 2.58-1.618l2.064-4.265A4.9 4.9 0 0 0 18 13.983V6.9A3.9 3.9 0 0 0 14.1 3H8.19a3.9 3.9 0 0 0-3.658 2.55l-2.287 6.2c-.94 2.547.945 5.25 3.66 5.25H10v2.133A2.867 2.867 0 0 0 12.867 22Zm.96-2.402a1.067 1.067 0 0 1-2.027-.465v-2.739c0-.66-.535-1.194-1.194-1.194H5.904a2.1 2.1 0 0 1-1.97-2.827l2.287-6.2A2.1 2.1 0 0 1 8.19 4.8h5.91c1.16 0 2.1.94 2.1 2.1v7.083a3.1 3.1 0 0 1-.31 1.35l-2.063 4.265Z" clip-rule="evenodd"/></symbol>
+      <!-- своя: в библиотеке нет точного «следующее видео» как в плеере VK Видео -->
+      <symbol id="i-next" viewBox="0 0 24 24"><path d="M5 5.5v13l9.5-6.5zM16.5 5.5h2.5v13h-2.5z" fill="currentColor"/></symbol>
+      <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="m15.5 15.5 4.5 4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+      <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4.5 6.5h15M9.5 6.5V5a1.5 1.5 0 0 1 1.5-1.5h2A1.5 1.5 0 0 1 14.5 5v1.5M6.5 6.5l.8 12.1a2 2 0 0 0 2 1.9h5.4a2 2 0 0 0 2-1.9l.8-12.1M10 10.5v6M14 10.5v6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+      <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m9.5 6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+      <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/></symbol>
+      <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="1.9"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></symbol>
+      <symbol id="i-spark-outline" viewBox="-1 -1 14 14"><g fill="none" stroke="currentColor" stroke-width=".95" stroke-linejoin="round"><path d="M2.803.218a.319.319 0 0 0-.606 0l-.242.728c-.159.476-.533.85-1.009 1.009l-.728.242a.319.319 0 0 0 0 .606l.728.242c.476.159.85.533 1.009 1.009l.242.728a.32.32 0 0 0 .606 0l.242-.728c.159-.476.533-.85 1.009-1.009l.728-.242a.319.319 0 0 0 0-.606l-.728-.242A1.6 1.6 0 0 1 3.045.946z"/><path d="M6.436 3.472c-.256.746-.599 1.5-1.031 1.933-.433.432-1.187.775-1.933 1.03a12 12 0 0 1-.768.237c-.272.075-.272.58 0 .656a15 15 0 0 1 .768.236c.746.256 1.5.599 1.933 1.031.432.433.775 1.187 1.03 1.933a13 13 0 0 1 .237.768c.075.272.58.272.656 0a15 15 0 0 1 .236-.768c.256-.746.599-1.5 1.031-1.933.433-.432 1.187-.775 1.933-1.03a13 13 0 0 1 .768-.237c.272-.075.272-.58 0-.656a15 15 0 0 1-.768-.236c-.746-.256-1.5-.599-1.933-1.031-.432-.433-.775-1.187-1.03-1.933a12 12 0 0 1-.237-.768c-.075-.272-.58-.272-.656 0a15 15 0 0 1-.236.768z"/></g></symbol>
+      <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 11v5.5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/><circle cx="12" cy="7.8" r="1.15" fill="currentColor"/></symbol>
+    </defs>
+  </svg>
+
+  <script src="data.js?v=4"></script>
+  <script src="app.js?v=78"></script>
+  <script src="fx.js?v=34"></script>
+</body>
+</html>
