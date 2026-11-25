@@ -283,8 +283,9 @@ body[data-mode="after"] .action--recap.only-after { display: flex; }
 .seg.is-hl i { background: linear-gradient(90deg, var(--ai-1), var(--ai-2), var(--ai-3)); }
 .bar__thumb { position: absolute; top: 1px; width: 14px; height: 14px; margin-left: -7px; border-radius: 50%; background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,.4); transition: transform .2s; }
 .player.is-clean .bar__thumb { transform: scale(0); }
-.player.is-clean .bar { bottom: 0; }
-.player.is-clean .bar__track { top: 12px; height: 3px; }
+/* Как в приложении VK Видео: когда элементы плеера скрыты, полоса прогресса тоже исчезает целиком */
+.bar { transition: opacity .25s ease; }
+.player.is-clean .bar { opacity: 0; pointer-events: none; }
 .bar.is-anim .bar__thumb { transition: left .7s var(--ease-sheet); }
 .bar__tip { position: absolute; bottom: 22px; transform: translateX(-50%); font-size: 12.5px; font-weight: 600; padding: 4px 8px; border-radius: 8px; background: rgba(0,0,0,.75); white-space: nowrap; opacity: 0; transition: opacity .2s; pointer-events: none; }
 .bar__tip.is-on { opacity: 1; }
@@ -456,7 +457,7 @@ body.is-video .snackbar { bottom: calc(12px + var(--safe-bottom)); }
 /* ================= Мобильный режим: прототип на весь экран ================= */
 /* ================= Подсказки для проверяющего ================= */
 .screen, .screen button { cursor: default; }
-.screen :is(#chapterLabel, .promo__close, #vMetaBtn, .desc__tc, #descClose, #descRecapMore, #peekCard, #peekClose, .card.is-live, .row.is-live, #continueAll, #historyAll, #listBack, .recap__item, #btnContinue, #btnChapter, #sheetClose, .feedback button, #recapChip, #playBtn, #playerBack, #snackAction, .bar, #playerFrame, #playerUi, .sheet-scrim) { cursor: pointer; }
+.screen :is(.player__next, #chapterLabel, .promo__close, #vMetaBtn, .desc__tc, #descClose, #descRecapMore, #peekCard, #peekClose, .card.is-live, .row.is-live, #continueAll, #historyAll, #listBack, .recap__item, #btnContinue, #btnChapter, #sheetClose, .feedback button, #recapChip, #playBtn, #playerBack, #snackAction, .bar, #playerFrame, #playerUi, .sheet-scrim) { cursor: pointer; }
 .sheet__handle { cursor: grab; }
 /* клик мимо — рабочие зоны мигают синим */
 /* Подсветка рабочих зон при нажатии мимо — только контур. Ничего не подменяет (ни фон, ни собственные анимации),
@@ -1059,3 +1060,14 @@ body.is-video .statusbar { transition: background .18s linear .28s, color .18s l
   100% { box-shadow: 0 0 0 0 rgba(38,136,235,0); }
 }
 @media (prefers-reduced-motion: reduce) { .demo-status.is-waiting .ds__next { animation: none !important; } }
+
+/* Полки мышью: курсор «рука» подсказывает, что ленту можно тянуть */
+@media (hover: hover) and (pointer: fine) {
+  .screen .shelf__row, .screen .shelf__row *, .screen .chips, .screen .chips * { cursor: grab; }
+  .screen .is-dragging, .screen .is-dragging * { cursor: grabbing !important; user-select: none; }
+}
+
+/* переход к следующему видео: кадр коротко гаснет, пока подменяется ролик */
+.player .scene, .player video { transition: opacity .18s ease; }
+.player.is-switching .scene, .player.is-switching video { opacity: 0; }
+.screen .player__next { cursor: pointer; }

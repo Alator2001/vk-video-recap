@@ -217,6 +217,13 @@
   $('#playerFrame').addEventListener('click', () => {
     if (player.classList.contains('is-clean')) showControls(); else if (S.playing) player.classList.add('is-clean');
   });
+  // мышь над видео — показываем элементы управления (назад, время, главы), убрали — прячем, если видео играет
+  player.addEventListener('pointermove', e => { if (e.pointerType === 'mouse') showControls(true); });
+  player.addEventListener('pointerleave', e => {
+    if (e.pointerType !== 'mouse') return;
+    clearTimeout(S.hideTimer);
+    S.hideTimer = setTimeout(() => { if (S.playing) player.classList.add('is-clean'); }, 500);
+  });
   $('#playerUi').addEventListener('click', e => { if (e.target === e.currentTarget && S.playing) player.classList.add('is-clean'); });
   $('#playBtn').addEventListener('click', e => { e.stopPropagation(); setPlaying(!S.playing); });
 
@@ -559,7 +566,7 @@
 
   /* ---------- подсказки для проверяющего ---------- */
   // Что в прототипе реально работает. Клик мимо — рабочие зоны коротко подсвечиваются (как в Figma).
-  const LIVE = `.promo__close, #vMetaBtn, #descSheet, #sheet, #chSheet, #chapterLabel, #peekCard, #peekClose, .card.is-live, .row.is-live, #continueAll, #historyAll, #listBack, .recap__item, #btnContinue, #btnChapter, #sheetClose, .feedback button,
+  const LIVE = `.player__next, .promo__close, #vMetaBtn, #descSheet, #sheet, #chSheet, #chapterLabel, #peekCard, #peekClose, .card.is-live, .row.is-live, #continueAll, #historyAll, #listBack, .recap__item, #btnContinue, #btnChapter, #sheetClose, .feedback button,
     #recapChip:not(.is-hidden), #playBtn, #playerBack, .bar, #snackAction, #playerFrame, #playerUi, .sheet__handle, .sheet-scrim`;
   const screen = $('#screen');
   let flashTimer;
@@ -629,6 +636,23 @@
     showView(back);
   }
   $('#playerBack').addEventListener('click', e => { e.stopPropagation(); closeVideo(); });
+  // «Следующее видео» в плеере: следующий ролик из «Продолжить просмотр» (по кругу) — с тем же сценарием возврата
+  function playNextVideo() {
+    const list = D.continueList;
+    const next = D.videos[list[(list.indexOf(M.id) + 1) % list.length]];
+    if (!next || next === M) return;
+    if (S.scenario === 'nospeech' || S.scenario === 'error') { S.scenario = 'days'; S.errorResolved = false; }
+    stopGhost(); closeSheet(); closeDesc(); closeChapters(); setPlaying(false);
+    clearTimeout(peekTimer); peek.getAnimations().forEach(a => a.cancel()); peek.style.height = '0px'; peek.classList.remove('is-on', 'is-leaving');
+    $('#snackbar').classList.remove('is-on');
+    track('player_next_click', { from_video: M.id, to_video: next.id });
+    player.classList.add('is-switching');
+    setTimeout(() => {
+      M = next; renderVideoStatic(); openVideo('player_next');
+      requestAnimationFrame(() => player.classList.remove('is-switching'));
+    }, 180);
+  }
+  $('.player__next').addEventListener('click', e => { e.stopPropagation(); playNextVideo(); });
   function onOpenClick(e) {
     const c = e.target.closest('[data-open]'); if (!c) return;
     const v = D.videos[c.dataset.open]; if (!v) return;
@@ -977,6 +1001,63 @@
     updatePlayer();
   }
   addEventListener('resize', fit);
+
+  /* ---------- горизонтальные полки мышью: перетаскивание, как свайп на телефоне ---------- */
+  // Тачпад и телефон листают сами; мышь — перетаскиванием. Короткий клик по карточке работает как раньше.
+  function dragScroll(row) {
+    let x0 = 0, left0 = 0, dragging = false, down = false, lastX = 0, lastT = 0, v = 0, snapT;
+    const scale = () => row.getBoundingClientRect().width / row.offsetWidth || 1;   // телефон-рамка масштабирована
+    const release = () => { down = false; };
+    row.addEventListener('dragstart', e => e.preventDefault());
+    row.addEventListener('pointerdown', e => {
+      if (e.pointerType !== 'mouse' || e.button !== 0) return;
+      clearTimeout(snapT);
+      down = true; dragging = false; x0 = lastX = e.clientX; left0 = row.scrollLeft; lastT = performance.now(); v = 0;
+    });
+    // кнопку отпустили где угодно (в том числе за пределами телефона) — перетаскивание закончено
+    addEventListener('pointerup', release, true);
+    row.addEventListener('pointermove', e => {
+      if (!down) return;
+      if (!(e.buttons & 1)) { down = false; return; }   // кнопка уже не зажата — это просто движение курсора
+      const dx = e.clientX - x0;
+      if (!dragging && Math.abs(dx) > 5) {
+        dragging = true; row.style.scrollSnapType = 'none'; row.classList.add('is-dragging');
+        try { row.setPointerCapture(e.pointerId); } catch (err) {}
+      }
+      if (!dragging) return;
+      const k = scale();
+      row.scrollLeft = left0 - dx / k;
+      const now = performance.now(); v = (e.clientX - lastX) / Math.max(1, now - lastT) / k; lastX = e.clientX; lastT = now;
+    });
+    const end = () => {
+      if (!dragging) return;
+      row.classList.remove('is-dragging');
+      // докатываем к ближайшей карточке с учётом скорости; привязку возвращаем, когда прокрутка закончилась
+      const k = scale(), rr = row.getBoundingClientRect();
+      // инерция: только если отпустили «на ходу», и не дальше полутора карточек — без резких бросков
+      if (performance.now() - lastT > 90) v = 0;
+      const card = row.firstElementChild ? row.firstElementChild.offsetWidth + 12 : 200;
+      const fling = Math.max(-card * 1.5, Math.min(card * 1.5, v * 180));
+      const projected = row.scrollLeft - fling;
+      const max = row.scrollWidth - row.clientWidth;
+      let best = row.scrollLeft, bd = Infinity;
+      [...row.children].forEach(c => {
+        const pos = Math.min(max, Math.max(0, row.scrollLeft + (c.getBoundingClientRect().left - rr.left) / k - 16));
+        const d = Math.abs(pos - projected); if (d < bd) { bd = d; best = pos; }
+      });
+      row.scrollTo({ left: best, behavior: 'smooth' });
+      const restore = () => { clearTimeout(snapT); row.style.scrollSnapType = ''; row.removeEventListener('scrollend', restore); };
+      row.addEventListener('scrollend', restore);
+      snapT = setTimeout(restore, 700);
+      setTimeout(() => { dragging = false; }, 0);
+    };
+    row.addEventListener('pointerup', end);
+    row.addEventListener('pointercancel', () => { down = false; end(); });
+    row.addEventListener('lostpointercapture', end);
+    // после перетаскивания отпускание мыши не считается нажатием на карточку
+    row.addEventListener('click', e => { if (dragging) { e.preventDefault(); e.stopPropagation(); } }, true);
+  }
+  $$('#screen .shelf__row, #screen .chips').forEach(dragScroll);
 
   /* ---------- старт ---------- */
   renderMoe(); renderList(); renderVideoStatic(); updateStyleNote(); setMode('after'); setScenario('days'); fit();
