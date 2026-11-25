@@ -1060,6 +1060,8 @@
   }
   $$('#screen .shelf__row, #screen .chips').forEach(dragScroll);
 
+  $('#specLink').addEventListener('click', () => track('spec_open', { from: 'panel' }));
+
   /* ---------- старт ---------- */
   renderMoe(); renderList(); renderVideoStatic(); updateStyleNote(); setMode('after'); setScenario('days'); fit();
 })();

@@ -1144,3 +1144,20 @@ body[data-theme="light"] .panel__lead, body[data-theme="light"] .scn__body span,
 body[data-theme="light"] .cell__t small, body[data-theme="light"] .panel__note { color: #5d6670 !important; }
 body[data-theme="light"] .panel__foot { color: #6d7885 !important; }
 body[data-theme="light"] .is-side .ds__head { color: rgba(0,0,0,.6); }
+
+/* Ссылка на спецификацию в панели — ячейка в стиле VK: иконка в круге, заголовок, подпись, стрелка «открыть» */
+.spec-link { display: flex; align-items: center; gap: 12px; margin-top: 18px; padding: 10px 12px 10px 10px; border-radius: 14px;
+  background: rgba(255,255,255,.04); box-shadow: inset 0 0 0 1px rgba(255,255,255,.07); color: var(--text); text-decoration: none;
+  transition: background .2s, box-shadow .2s; }
+.spec-link:hover { background: rgba(255,255,255,.07); box-shadow: inset 0 0 0 1px rgba(113,170,235,.35); }
+.spec-link:active { transform: scale(.99); }
+.spec-link__ic { flex: none; width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; background: var(--accent-soft); color: var(--link); }
+.spec-link__ic svg { width: 20px; height: 20px; }
+.spec-link__t { flex: 1; min-width: 0; font-size: 15px; font-weight: 600; }
+.spec-link__t small { display: block; margin-top: 1px; font-size: 13px; font-weight: 400; color: #a3a6ab; }
+.spec-link__go { flex: none; width: 18px; height: 18px; color: #8c8f94; transition: transform .2s var(--ease), color .2s; }
+.spec-link:hover .spec-link__go { transform: translate(2px, -2px); color: var(--link); }
+body[data-theme="light"] .spec-link { background: rgba(0,0,0,.025); box-shadow: inset 0 0 0 1px rgba(0,0,0,.07); color: #000; }
+body[data-theme="light"] .spec-link:hover { background: rgba(0,0,0,.045); box-shadow: inset 0 0 0 1px rgba(38,136,235,.35); }
+body[data-theme="light"] .spec-link__t small { color: #5d6670; }
+body[data-theme="light"] .spec-link__ic { color: var(--accent); }

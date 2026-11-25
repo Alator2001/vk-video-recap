@@ -21,7 +21,7 @@
   <meta name="twitter:title" content="Продолжить с пересказом — концепт для VK Видео" />
   <meta name="twitter:description" content="ИИ-пересказ просмотренной части, когда возвращаешься к длинному видео. Без спойлеров." />
   <meta name="twitter:image" content="https://alator2001.github.io/vk-video-recap/og.png" />
-  <link rel="stylesheet" href="styles.css?v=84" />
+  <link rel="stylesheet" href="styles.css?v=85" />
 </head>
 <body data-mode="after" data-theme="dark">
   <!-- Тема выставляется до первой отрисовки — без вспышки тёмной темы у тех, кто выбрал светлую -->
@@ -41,6 +41,13 @@
       <p class="panel__lead">
         Вернулись к&nbsp;длинному видео через несколько дней&nbsp;— VK Видео коротко напоминает, что было до места остановки. Без спойлеров дальше.
       </p>
+
+      <!-- Ссылка на спецификацию: метрики, A/B-тест, правила показа, события аналитики -->
+      <a class="spec-link" id="specLink" href="https://github.com/Alator2001/vk-video-recap/blob/main/SPEC.md" target="_blank" rel="noopener">
+        <span class="spec-link__ic"><svg viewBox="0 0 20 20"><use href="#i-article"/></svg></span>
+        <span class="spec-link__t">Спецификация<small>Метрики, A/B-тест, правила показа</small></span>
+        <svg class="spec-link__go" viewBox="0 0 20 20"><use href="#i-out"/></svg>
+      </a>
 
       <div class="panel__group panel__mode">
         <div class="panel__h">Версия</div>
@@ -399,11 +406,13 @@
       <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="1.9"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></symbol>
       <symbol id="i-spark-outline" viewBox="-1 -1 14 14"><g fill="none" stroke="currentColor" stroke-width=".95" stroke-linejoin="round"><path d="M2.803.218a.319.319 0 0 0-.606 0l-.242.728c-.159.476-.533.85-1.009 1.009l-.728.242a.319.319 0 0 0 0 .606l.728.242c.476.159.85.533 1.009 1.009l.242.728a.32.32 0 0 0 .606 0l.242-.728c.159-.476.533-.85 1.009-1.009l.728-.242a.319.319 0 0 0 0-.606l-.728-.242A1.6 1.6 0 0 1 3.045.946z"/><path d="M6.436 3.472c-.256.746-.599 1.5-1.031 1.933-.433.432-1.187.775-1.933 1.03a12 12 0 0 1-.768.237c-.272.075-.272.58 0 .656a15 15 0 0 1 .768.236c.746.256 1.5.599 1.933 1.031.432.433.775 1.187 1.03 1.933a13 13 0 0 1 .237.768c.075.272.58.272.656 0a15 15 0 0 1 .236-.768c.256-.746.599-1.5 1.031-1.933.433-.432 1.187-.775 1.933-1.03a13 13 0 0 1 .768-.237c.272-.075.272-.58 0-.656a15 15 0 0 1-.768-.236c-.746-.256-1.5-.599-1.933-1.031-.432-.433-.775-1.187-1.03-1.933a12 12 0 0 1-.237-.768c-.075-.272-.58-.272-.656 0a15 15 0 0 1-.236.768z"/></g></symbol>
       <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 11v5.5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/><circle cx="12" cy="7.8" r="1.15" fill="currentColor"/></symbol>
+      <symbol id="i-article" viewBox="0 0 20 20"><path fill="currentColor" d="M6.916 2h6.168c1.434 0 2.132.135 2.857.523a3.6 3.6 0 0 1 1.536 1.536c.388.725.523 1.423.523 2.857v6.168c0 1.434-.135 2.132-.523 2.857a3.6 3.6 0 0 1-1.536 1.536c-.725.388-1.423.523-2.857.523H6.916c-1.434 0-2.132-.135-2.857-.523a3.6 3.6 0 0 1-1.536-1.536C2.135 15.216 2 14.518 2 13.084V6.916c0-1.434.135-2.132.523-2.857a3.6 3.6 0 0 1 1.536-1.536C4.784 2.135 5.482 2 6.916 2Zm0 1.5c-1.208 0-1.672.09-2.15.345a2.1 2.1 0 0 0-.92.92c-.256.479-.346.943-.346 2.151v6.168c0 1.208.09 1.672.345 2.15.214.4.522.707.921.921.478.256.942.345 2.15.345h6.168c1.208 0 1.672-.09 2.15-.345a2.1 2.1 0 0 0 .921-.92c.256-.479.345-.943.345-2.151V6.916c0-1.208-.09-1.672-.345-2.15a2.1 2.1 0 0 0-.92-.921c-.479-.256-.943-.345-2.151-.345H6.916ZM6.75 6h6.5a.75.75 0 0 1 0 1.5h-6.5a.75.75 0 0 1 0-1.5Zm0 3.25h6.5a.75.75 0 0 1 0 1.5h-6.5a.75.75 0 0 1 0-1.5Zm0 3.25h4.5a.75.75 0 0 1 0 1.5h-4.5a.75.75 0 0 1 0-1.5Z"/></symbol>
+      <symbol id="i-out" viewBox="0 0 20 20"><path fill="currentColor" d="M15.747 12.378a.75.75 0 0 1-1.5-.001l.002-5.566-8.719 8.72a.75.75 0 1 1-1.06-1.061l8.72-8.72H7.58a.75.75 0 0 1 0-1.5H15l.148.015A.75.75 0 0 1 15.75 5l-.003 7.378Z"/></symbol>
     </defs>
   </svg>
 
   <script src="data.js?v=5"></script>
-  <script src="app.js?v=84"></script>
+  <script src="app.js?v=85"></script>
   <script src="fx.js?v=35"></script>
 </body>
 </html>
