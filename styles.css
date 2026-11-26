@@ -1171,3 +1171,11 @@ body[data-theme="light"] .spec-link__ic { color: var(--accent); }
   body, body * { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
 }
 .screen .shelf__row, .screen .chips { scroll-behavior: auto; overscroll-behavior-x: contain; }
+/* Резинка у края ленты: сдвигаются карточки (переменная --over), контейнер прокрутки остаётся на месте */
+.screen .shelf__row > *, .screen .chips > * { transform: translateX(var(--over, 0px)); }
+.screen .shelf__row.is-springing > *, .screen .chips.is-springing > * { transition: transform .32s cubic-bezier(.25,.8,.25,1); }
+
+/* Пункты пересказа при наведении: подсветка появляется сразу, а гаснет плавно — при быстром движении мыши нет мигания */
+.recap__item { transition: background .22s ease-out; }
+.recap__item:hover { transition-duration: 0s; }
+.seg { transition: transform .18s ease-out, background .18s ease-out; }
