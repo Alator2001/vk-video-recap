@@ -1107,31 +1107,115 @@
   }
   $$('#screen .shelf__row, #screen .chips').forEach(dragScroll);
 
-  $('#specLink').addEventListener('click', () => track('spec_open', { from: 'panel' }));
 
-  /* ---------- «О решении»: описание отдельным листом поверх сайта ---------- */
-  const docLayer = $('#docLayer');
-  let docReturnFocus = null;
-  function openDoc() {
-    docReturnFocus = document.activeElement;
+  /* ---------- листы поверх сайта: «О решении» и «Спецификация» ---------- */
+  let sheetReturnFocus = null;
+  function openLayer(layer, scrollEl, event) {
+    $$('.doc-layer.is-open').forEach(l => closeLayer(l, false));
+    sheetReturnFocus = sheetReturnFocus || document.activeElement;
     closePanel();
-    $('#docScroll').scrollTop = 0;
-    docLayer.classList.add('is-open'); docLayer.setAttribute('aria-hidden', 'false');
+    scrollEl.scrollTop = 0; layer.classList.remove('is-scrolled');
+    layer.classList.add('is-open'); layer.setAttribute('aria-hidden', 'false');
     document.body.classList.add('doc-open');
-    setTimeout(() => $('.doc', docLayer).focus({ preventScroll: true }), 50);
-    track('description_open', { from: 'panel' });
+    setTimeout(() => $('.doc', layer).focus({ preventScroll: true }), 50);
+    track(event, { from: 'panel' });
   }
-  function closeDoc() {
-    if (!docLayer.classList.contains('is-open')) return;
-    docLayer.classList.remove('is-open'); docLayer.setAttribute('aria-hidden', 'true');
-    document.body.classList.remove('doc-open');
-    if (docReturnFocus && docReturnFocus.focus) docReturnFocus.focus({ preventScroll: true });
+  function closeLayer(layer, restoreFocus = true) {
+    if (!layer.classList.contains('is-open')) return;
+    layer.classList.remove('is-open'); layer.setAttribute('aria-hidden', 'true');
+    if (!$('.doc-layer.is-open')) document.body.classList.remove('doc-open');
+    if (restoreFocus && sheetReturnFocus && sheetReturnFocus.focus) { sheetReturnFocus.focus({ preventScroll: true }); sheetReturnFocus = null; }
   }
-  $('#docOpen').addEventListener('click', openDoc);
-  $$('[data-doc-close]', docLayer).forEach(b => b.addEventListener('click', closeDoc));
-  addEventListener('keydown', e => { if (e.key === 'Escape' && docLayer.classList.contains('is-open')) { e.preventDefault(); closeDoc(); } });
-  // полоса в шапке листа появляется, когда начали прокручивать
-  $('#docScroll').addEventListener('scroll', e => docLayer.classList.toggle('is-scrolled', e.target.scrollTop > 40), { passive: true });
+  $$('.doc-layer').forEach(layer => {
+    $$('[data-doc-close]', layer).forEach(b => b.addEventListener('click', () => closeLayer(layer)));
+    $('.doc__scroll', layer).addEventListener('scroll', e => layer.classList.toggle('is-scrolled', e.target.scrollTop > 40), { passive: true });
+  });
+  addEventListener('keydown', e => { const open = $('.doc-layer.is-open'); if (e.key === 'Escape' && open) { e.preventDefault(); closeLayer(open); } });
+
+  const docLayer = $('#docLayer'), specLayer = $('#specLayer');
+  $('#docOpen').addEventListener('click', () => openLayer(docLayer, $('#docScroll'), 'description_open'));
+
+  // Спецификация: текст берём из SPEC.md (один источник правды) и показываем в том же стиле
+  let specLoaded = false;
+  function openSpec() {
+    openLayer(specLayer, $('#specScroll'), 'spec_open');
+    if (specLoaded) return;
+    specLoaded = true;
+    fetch('SPEC.md?v=' + Date.now()).then(r => { if (!r.ok) throw 0; return r.text(); }).then(renderSpec).catch(() => {
+      specLoaded = false;
+      $('#specBody').innerHTML = `<p>Не удалось загрузить. <a href="${$('#specLink').href}" target="_blank" rel="noopener">Открыть на GitHub</a></p>`;
+    });
+  }
+  $$('[data-open-spec]').forEach(a => a.addEventListener('click', e => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return;   // с модификатором — как обычная ссылка на GitHub
+    e.preventDefault(); openSpec();
+  }));
+
+  // Небольшой разбор Markdown — ровно то, что есть в SPEC.md: заголовки, абзацы, списки (с вложенными),
+  // нумерованные списки, таблицы, цитаты, **жирный**, `код`, ссылки
+  function mdInline(t) {
+    t = esc(t);
+    t = t.replace(/`([^`]+)`/g, '<code>$1</code>');
+    t = t.replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>');
+    t = t.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (m, txt, url) => `<a href="${url}" target="_blank" rel="noopener">${txt}</a>`);
+    return t;
+  }
+  function renderSpec(md) {
+    const lines = md.replace(/\r/g, '').split('\n');
+    let html = '', para = [], list = null, quote = [], table = [];
+    const toc = [];
+    const flushPara = () => { if (para.length) { html += `<p>${mdInline(para.join(' '))}</p>`; para = []; } };
+    const flushQuote = () => { if (quote.length) { html += `<div class="doc__notes">${quote.map(q => `<p>${mdInline(q)}</p>`).join('')}</div>`; quote = []; } };
+    const flushList = () => {
+      if (!list) return;
+      const tag = list.ordered ? 'ol' : 'ul';
+      html += `<${tag} class="${list.ordered ? 'doc__olist' : 'doc__list'}">` + list.items.map(it =>
+        `<li>${mdInline(it.text)}${it.extra.length ? ' ' + it.extra.map(mdInline).join(' ') : ''}${it.sub.length ? `<ul class="doc__list doc__list--sub">${it.sub.map(x => `<li>${mdInline(x)}</li>`).join('')}</ul>` : ''}${it.after.length ? `<p class="doc__after">${mdInline(it.after.join(' '))}</p>` : ''}</li>`
+      ).join('') + `</${tag}>`;
+      list = null;
+    };
+    const flushTable = () => {
+      if (!table.length) return;
+      const rows = table.map(r => r.replace(/\\\|/g, '\u0001').replace(/^\||\|$/g, '').split('|').map(c => c.trim().replace(/\u0001/g, '|')));   // \| внутри ячейки — это символ, а не граница
+      const head = rows[0], body = rows.slice(2);
+      html += `<div class="doc__table"><table><thead><tr>${head.map(c => `<th>${mdInline(c)}</th>`).join('')}</tr></thead><tbody>${body.map(r => `<tr>${r.map((c, i) => `<td data-label="${esc(head[i] || '')}">${mdInline(c)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+      table = [];
+    };
+    const flushAll = () => { flushPara(); flushQuote(); flushList(); flushTable(); };
+    lines.forEach(line => {
+      let m;
+      if (/^#\s/.test(line)) { flushAll(); return; }   // заголовок документа — в шапке листа
+      if ((m = line.match(/^(##+)\s+(.*)$/))) {
+        flushAll();
+        const level = m[1].length, text = m[2], id = 'spec-' + toc.length;
+        if (level === 2) { toc.push({ id, text }); html += `<h2 id="${id}">${mdInline(text)}</h2>`; }
+        else html += `<h3>${mdInline(text)}</h3>`;
+        return;
+      }
+      if (/^\|/.test(line)) { flushPara(); flushQuote(); flushList(); table.push(line); return; }
+      if (table.length) flushTable();
+      if ((m = line.match(/^>\s?(.*)$/))) { flushPara(); flushList(); quote.push(m[1]); return; }
+      if (quote.length) flushQuote();
+      if ((m = line.match(/^\s{2,}[-*]\s+(.*)$/)) && list) { list.items[list.items.length - 1].sub.push(m[1]); return; }
+      if ((m = line.match(/^\s{2,}(\S.*)$/)) && list) { const it = list.items[list.items.length - 1]; (it.sub.length ? it.after : it.extra).push(m[1]); return; }
+      if ((m = line.match(/^[-*]\s+(.*)$/))) { flushPara(); if (!list || list.ordered) { flushList(); list = { ordered: false, items: [] }; } list.items.push({ text: m[1], sub: [], extra: [], after: [] }); return; }
+      if ((m = line.match(/^\d+\.\s+(.*)$/))) { flushPara(); if (!list || !list.ordered) { flushList(); list = { ordered: true, items: [] }; } list.items.push({ text: m[1], sub: [], extra: [], after: [] }); return; }
+      if (/^---+\s*$/.test(line)) { flushAll(); html += '<hr>'; return; }
+      if (!line.trim()) { flushAll(); return; }
+      flushList(); para.push(line.trim());
+    });
+    flushAll();
+    $('#specBody').innerHTML = html;
+    $('#specToc').innerHTML = `<p class="doc__toc-title">Содержание</p><ol>${toc.map(t => {
+      const mm = t.text.match(/^(\d+)\.\s*(.*)$/);
+      return `<li><a href="#${t.id}" data-toc="${t.id}"><span>${mm ? mm[1] : ''}</span>${mdInline(mm ? mm[2] : t.text)}</a></li>`;
+    }).join('')}</ol>`;
+    $$('#specToc [data-toc]').forEach(a => a.addEventListener('click', e => {
+      e.preventDefault();
+      const target = document.getElementById(a.dataset.toc), sc = $('#specScroll');
+      sc.scrollTo({ top: target.offsetTop - 70, behavior: 'smooth' });
+    }));
+  }
 
   /* ---------- старт ---------- */
   renderMoe(); renderList(); renderVideoStatic(); updateStyleNote(); setMode('after'); setScenario('days'); fit();

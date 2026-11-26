@@ -21,7 +21,7 @@
   <meta name="twitter:title" content="Продолжить с пересказом — концепт для VK Видео" />
   <meta name="twitter:description" content="ИИ-пересказ просмотренной части, когда возвращаешься к длинному видео. Без спойлеров." />
   <meta name="twitter:image" content="https://alator2001.github.io/vk-video-recap/og.png" />
-  <link rel="stylesheet" href="styles.css?v=93" />
+  <link rel="stylesheet" href="styles.css?v=98" />
 </head>
 <body data-mode="after" data-theme="dark">
   <!-- Тема выставляется до первой отрисовки — без вспышки тёмной темы у тех, кто выбрал светлую -->
@@ -49,7 +49,7 @@
         <svg class="spec-link__go" viewBox="0 0 24 24"><use href="#i-chevron"/></svg>
       </button>
       <!-- Ссылка на спецификацию: метрики, A/B-тест, правила показа, события аналитики -->
-      <a class="spec-link" id="specLink" href="https://github.com/Alator2001/vk-video-recap/blob/main/SPEC.md" target="_blank" rel="noopener">
+      <a class="spec-link" id="specLink" data-open-spec href="https://github.com/Alator2001/vk-video-recap/blob/main/SPEC.md" target="_blank" rel="noopener">
         <span class="spec-link__ic"><svg viewBox="0 0 20 20"><use href="#i-article"/></svg></span>
         <span class="spec-link__t">Спецификация<small>Метрики, A/B-тест, правила показа</small></span>
         <svg class="spec-link__go" viewBox="0 0 20 20"><use href="#i-out"/></svg>
@@ -439,7 +439,7 @@
           </div>
 
           <div class="doc__links">
-            <a class="doc__link doc__link--primary" href="https://github.com/Alator2001/vk-video-recap/blob/main/SPEC.md" target="_blank" rel="noopener">Спецификация <svg viewBox="0 0 20 20"><use href="#i-out"/></svg></a>
+            <a class="doc__link doc__link--primary" data-open-spec href="https://github.com/Alator2001/vk-video-recap/blob/main/SPEC.md" target="_blank" rel="noopener">Спецификация <svg viewBox="0 0 20 20"><use href="#i-out"/></svg></a>
             <a class="doc__link" href="https://github.com/Alator2001/vk-video-recap/blob/main/README.md" target="_blank" rel="noopener">README <svg viewBox="0 0 20 20"><use href="#i-out"/></svg></a>
           </div>
 
@@ -513,7 +513,7 @@
           <section class="doc__sec">
             <h2>Работа с&nbsp;ИИ и&nbsp;передача в&nbsp;разработку</h2>
             <p>Прототип собран в&nbsp;Claude Code: я&nbsp;ставил задачи, принимал продуктовые и&nbsp;дизайнерские решения и&nbsp;проверял результат, ИИ&nbsp;писал код.</p>
-            <p>Для передачи в&nbsp;разработку есть <a href="https://github.com/Alator2001/vk-video-recap/blob/main/SPEC.md" target="_blank" rel="noopener">спецификация</a> (тексты интерфейса, правила показа, события аналитики, A/B, состояния) и&nbsp;<a href="https://github.com/Alator2001/vk-video-recap/blob/main/README.md" target="_blank" rel="noopener">README</a>. Код прототипа демонстрационный, реализация&nbsp;— по&nbsp;спецификации.</p>
+            <p>Для передачи в&nbsp;разработку есть <a data-open-spec href="https://github.com/Alator2001/vk-video-recap/blob/main/SPEC.md" target="_blank" rel="noopener">спецификация</a> (тексты интерфейса, правила показа, события аналитики, A/B, состояния) и&nbsp;<a href="https://github.com/Alator2001/vk-video-recap/blob/main/README.md" target="_blank" rel="noopener">README</a>. Код прототипа демонстрационный, реализация&nbsp;— по&nbsp;спецификации.</p>
           </section>
 
           <footer class="doc__foot">
@@ -525,8 +525,32 @@
     </article>
   </div>
 
+
+  <!-- Спецификация: тот же «лист» поверх сайта; текст подгружается из SPEC.md -->
+  <div class="doc-layer" id="specLayer" aria-hidden="true">
+    <div class="doc-scrim" data-doc-close></div>
+    <article class="doc" role="dialog" aria-modal="true" aria-labelledby="specTitle" tabindex="-1">
+      <header class="doc__bar">
+        <span class="doc__bar-title">Спецификация</span>
+        <button class="doc__close" data-doc-close aria-label="Закрыть"><svg viewBox="0 0 24 24"><use href="#i-close"/></svg></button>
+      </header>
+      <div class="doc__scroll" id="specScroll">
+        <div class="doc__inner">
+          <p class="doc__eyebrow">Для дизайна, аналитики и разработки</p>
+          <h1 class="doc__title" id="specTitle">Спецификация.</h1>
+          <p class="doc__lead">«Продолжить с&nbsp;пересказом» для VK Видео: что добавляем в&nbsp;интерфейс, правила показа, данные, аналитика, A/B-тест и&nbsp;этапы.</p>
+          <div class="doc__links">
+            <a class="doc__link" href="https://github.com/Alator2001/vk-video-recap/blob/main/SPEC.md" target="_blank" rel="noopener">Открыть на&nbsp;GitHub <svg viewBox="0 0 20 20"><use href="#i-out"/></svg></a>
+          </div>
+          <nav class="doc__toc" id="specToc" aria-label="Содержание"></nav>
+          <div class="doc__md" id="specBody"><p class="doc__loading">Загружаем спецификацию…</p></div>
+        </div>
+      </div>
+    </article>
+  </div>
+
   <script src="data.js?v=5"></script>
-  <script src="app.js?v=97"></script>
+  <script src="app.js?v=100"></script>
   <script src="fx.js?v=35"></script>
 </body>
 </html>
