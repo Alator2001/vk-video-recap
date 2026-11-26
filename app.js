@@ -1109,6 +1109,30 @@
 
   $('#specLink').addEventListener('click', () => track('spec_open', { from: 'panel' }));
 
+  /* ---------- «О решении»: описание отдельным листом поверх сайта ---------- */
+  const docLayer = $('#docLayer');
+  let docReturnFocus = null;
+  function openDoc() {
+    docReturnFocus = document.activeElement;
+    closePanel();
+    $('#docScroll').scrollTop = 0;
+    docLayer.classList.add('is-open'); docLayer.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('doc-open');
+    setTimeout(() => $('.doc', docLayer).focus({ preventScroll: true }), 50);
+    track('description_open', { from: 'panel' });
+  }
+  function closeDoc() {
+    if (!docLayer.classList.contains('is-open')) return;
+    docLayer.classList.remove('is-open'); docLayer.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('doc-open');
+    if (docReturnFocus && docReturnFocus.focus) docReturnFocus.focus({ preventScroll: true });
+  }
+  $('#docOpen').addEventListener('click', openDoc);
+  $$('[data-doc-close]', docLayer).forEach(b => b.addEventListener('click', closeDoc));
+  addEventListener('keydown', e => { if (e.key === 'Escape' && docLayer.classList.contains('is-open')) { e.preventDefault(); closeDoc(); } });
+  // полоса в шапке листа появляется, когда начали прокручивать
+  $('#docScroll').addEventListener('scroll', e => docLayer.classList.toggle('is-scrolled', e.target.scrollTop > 40), { passive: true });
+
   /* ---------- старт ---------- */
   renderMoe(); renderList(); renderVideoStatic(); updateStyleNote(); setMode('after'); setScenario('days'); fit();
 })();

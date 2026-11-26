@@ -21,7 +21,7 @@
   <meta name="twitter:title" content="Продолжить с пересказом — концепт для VK Видео" />
   <meta name="twitter:description" content="ИИ-пересказ просмотренной части, когда возвращаешься к длинному видео. Без спойлеров." />
   <meta name="twitter:image" content="https://alator2001.github.io/vk-video-recap/og.png" />
-  <link rel="stylesheet" href="styles.css?v=91" />
+  <link rel="stylesheet" href="styles.css?v=93" />
 </head>
 <body data-mode="after" data-theme="dark">
   <!-- Тема выставляется до первой отрисовки — без вспышки тёмной темы у тех, кто выбрал светлую -->
@@ -42,6 +42,12 @@
         Вернулись к&nbsp;длинному видео через несколько дней&nbsp;— VK Видео коротко напоминает, что было до места остановки. Без спойлеров дальше.
       </p>
 
+      <!-- Описание решения: открывается отдельным листом поверх сайта -->
+      <button class="spec-link spec-link--doc" id="docOpen" type="button">
+        <span class="spec-link__ic"><svg viewBox="0 0 24 24"><use href="#i-spark"/></svg></span>
+        <span class="spec-link__t">О решении<small>Проблема, решение, метрики</small></span>
+        <svg class="spec-link__go" viewBox="0 0 24 24"><use href="#i-chevron"/></svg>
+      </button>
       <!-- Ссылка на спецификацию: метрики, A/B-тест, правила показа, события аналитики -->
       <a class="spec-link" id="specLink" href="https://github.com/Alator2001/vk-video-recap/blob/main/SPEC.md" target="_blank" rel="noopener">
         <span class="spec-link__ic"><svg viewBox="0 0 20 20"><use href="#i-article"/></svg></span>
@@ -411,8 +417,116 @@
     </defs>
   </svg>
 
+
+  <!-- Описание решения: отдельный «лист» поверх сайта (открывается из панели) -->
+  <div class="doc-layer" id="docLayer" aria-hidden="true">
+    <div class="doc-scrim" data-doc-close></div>
+    <article class="doc" role="dialog" aria-modal="true" aria-labelledby="docTitle" tabindex="-1">
+      <header class="doc__bar">
+        <span class="doc__bar-title">О решении</span>
+        <button class="doc__close" data-doc-close aria-label="Закрыть"><svg viewBox="0 0 24 24"><use href="#i-close"/></svg></button>
+      </header>
+      <div class="doc__scroll" id="docScroll">
+        <div class="doc__inner">
+          <p class="doc__eyebrow">Концепт для VK Видео</p>
+          <h1 class="doc__title" id="docTitle">Продолжить<br>с&nbsp;пересказом.</h1>
+          <p class="doc__lead">ИИ-пересказ просмотренной части длинного видео&nbsp;— чтобы вернуться и&nbsp;досмотреть, а&nbsp;не начинать заново. Без спойлеров.</p>
+
+          <div class="doc__facts">
+            <div class="fact"><b>8&nbsp;с</b><span>подсказка под плеером при&nbsp;возврате</span></div>
+            <div class="fact"><b>2&nbsp;входа</b><span>подсказка приходит сама, кнопка ✦ всегда под&nbsp;рукой</span></div>
+            <div class="fact"><b>≥&nbsp;5&nbsp;мин</b><span>досмотра за&nbsp;7&nbsp;дней&nbsp;— целевая метрика</span></div>
+          </div>
+
+          <div class="doc__links">
+            <a class="doc__link doc__link--primary" href="https://github.com/Alator2001/vk-video-recap/blob/main/SPEC.md" target="_blank" rel="noopener">Спецификация <svg viewBox="0 0 20 20"><use href="#i-out"/></svg></a>
+            <a class="doc__link" href="https://github.com/Alator2001/vk-video-recap/blob/main/README.md" target="_blank" rel="noopener">README <svg viewBox="0 0 20 20"><use href="#i-out"/></svg></a>
+          </div>
+
+          <section class="doc__sec">
+            <h2>Проблема</h2>
+            <p>Длинное видео часто бросают на&nbsp;середине и&nbsp;возвращаются к&nbsp;нему через пару дней. За&nbsp;это время детали забываются, и&nbsp;приходится перематывать назад или смотреть заново. Это барьер: часть людей так и&nbsp;не досматривает видео.</p>
+            <p>У&nbsp;VK Видео уже есть автоматические субтитры и&nbsp;главы, поэтому пересказ можно построить на&nbsp;готовой основе. Своего пересказа просмотренного в&nbsp;сервисе пока нет.</p>
+          </section>
+
+          <section class="doc__sec">
+            <h2>Рынок</h2>
+            <ul class="doc__list">
+              <li><b>Пересказ видео с&nbsp;ИИ&nbsp;— уже рыночная практика.</b> Яндекс с&nbsp;2023 года пересказывает видео в&nbsp;Браузере, YouTube тестирует ИИ-сводки и&nbsp;вопросы к&nbsp;видео и&nbsp;в&nbsp;первую очередь даёт их&nbsp;подписчикам Premium, Amazon Prime Video пересказывает сериалы ровно до&nbsp;места остановки.</li>
+              <li><b>Спрос есть, но&nbsp;внимание уходит из&nbsp;сервиса.</b> Ролики из&nbsp;VK Видео уже пересказывают сторонние сервисы, например GigaChat.</li>
+              <li><b>Ниша свободна.</b> Пересказа просмотренного прямо в&nbsp;плеере, без спойлеров и&nbsp;для длинных обычных видео&nbsp;— подкастов, разборов, лекций&nbsp;— у&nbsp;VK Видео нет.</li>
+            </ul>
+          </section>
+
+          <section class="doc__sec">
+            <h2>Решение</h2>
+            <ul class="doc__list">
+              <li><b>При возврате</b> видео продолжается с&nbsp;места остановки, а&nbsp;под плеером на&nbsp;8&nbsp;секунд появляется подсказка «Что было до&nbsp;38:30».</li>
+              <li><b>Внутри</b>&nbsp;— пересказ по&nbsp;главам до&nbsp;места остановки, без спойлеров дальше. Задача не&nbsp;заменить видео кратким содержанием, а&nbsp;помочь вернуться и&nbsp;досмотреть.</li>
+              <li><b>Второй вход.</b> Если подсказку закрыть, пересказ остаётся под кнопкой ✦ в&nbsp;ряду действий. Один вход приходит сам, второй всегда под рукой.</li>
+              <li><b>Не&nbsp;надоедаем.</b> Если прошло меньше 24&nbsp;часов, подсказки нет. После 2&nbsp;пропусков подряд автопоказ выключается и&nbsp;включается снова, когда человек сам открывает пересказ.</li>
+              <li><b>MVP</b>&nbsp;— подсказка и&nbsp;кнопка ✦. Блок в&nbsp;«Описании» и&nbsp;вкладку в&nbsp;главах добавим, только если данные покажут, что кнопку не&nbsp;находят.</li>
+            </ul>
+          </section>
+
+          <section class="doc__sec">
+            <h2>Влияние на&nbsp;бизнес</h2>
+            <ol class="doc__flow" aria-label="Цепочка ценности">
+              <li>Пересказ снимает барьер «не&nbsp;помню»</li>
+              <li>Больше возвратов и&nbsp;досмотров</li>
+              <li>Растёт время просмотра</li>
+              <li>Реклама и&nbsp;подписка</li>
+            </ol>
+            <ul class="doc__list">
+              <li><b>Реклама.</b> В&nbsp;длинных видео больше рекламных пауз, поэтому каждый досмотр&nbsp;— дополнительные показы рекламы.</li>
+              <li><b>Подписка&nbsp;— фримиум.</b> Базовый пересказ при возврате бесплатный: он&nbsp;работает на&nbsp;возвраты. Расширенные ИИ-функции&nbsp;— пересказ всего видео, вопросы к&nbsp;видео, конспект с&nbsp;таймкодами&nbsp;— входят в&nbsp;платную подписку и&nbsp;добавляют ей&nbsp;ценность сверх «без рекламы».</li>
+              <li><b>Удержание.</b> Человек возвращается досмотреть в&nbsp;VK Видео, а&nbsp;не&nbsp;ищет пересказ у&nbsp;сторонних сервисов.</li>
+              <li><b>Авторы.</b> Длинные ролики досматривают чаще, а&nbsp;значит, авторам выгоднее выпускать длинный контент на&nbsp;платформе.</li>
+            </ul>
+          </section>
+
+          <section class="doc__sec">
+            <h2>Метрики</h2>
+            <dl class="doc__spec">
+              <div><dt>Целевая метрика</dt><dd><b>Доля «спасённых» видео:</b> из&nbsp;длинных видео, брошенных на&nbsp;середине, какую часть досматривают дальше&nbsp;— человек вернулся в&nbsp;течение недели и&nbsp;посмотрел ещё хотя&nbsp;бы 5&nbsp;минут.</dd></div>
+              <div><dt>Бизнес-метрики</dt><dd>Время просмотра длинных видео на&nbsp;пользователя; показы рекламы в&nbsp;длинных видео; доля людей, которые возвращаются в&nbsp;VK Видео через неделю и&nbsp;через месяц.</dd></div>
+              <div><dt>Подписка <small>отдельный тест</small></dt><dd>Конверсия в&nbsp;подписку из&nbsp;ИИ-функций, удержание подписчиков.</dd></div>
+              <div><dt>Контрольные <small>не&nbsp;должны ухудшиться</small></dt><dd>Скорость запуска видео&nbsp;— подсказка не&nbsp;должна замедлять старт; общее время просмотра; доля оценок «неточно»; конверсия промо подписки.</dd></div>
+            </dl>
+            <div class="doc__notes">
+              <p><b>Как проверяем.</b> A/B-тест 50/50 по&nbsp;пользователям, минимум 2&nbsp;недели. Раскатываем, если целевая метрика выросла, а&nbsp;контрольные не&nbsp;просели. Платную часть тестируем отдельно, чтобы не&nbsp;смешать эффект пересказа с&nbsp;эффектом оплаты.</p>
+              <p><b>Главный риск</b>&nbsp;— ИИ&nbsp;ошибётся или проспойлерит. Снижаем: пересказ строится только по&nbsp;просмотренной части и&nbsp;субтитрам, есть пометка «Создано автоматически» и&nbsp;кнопки 👍/👎, а&nbsp;доля 👎&nbsp;— контрольная метрика.</p>
+            </div>
+          </section>
+
+          <section class="doc__sec">
+            <h2>Дизайн-система</h2>
+            <p>Новое собрано из&nbsp;паттернов VK Видео: подсказка&nbsp;— как карточка «Комментарии», шторка&nbsp;— как «Описание», таймкоды&nbsp;— в&nbsp;родном формате. Иконки и&nbsp;ИИ-знак&nbsp;— из&nbsp;официальной библиотеки VK.</p>
+            <p><b>Осознанные отступления:</b></p>
+            <ul class="doc__list">
+              <li>полка «Продолжить просмотр» крупнее остальных&nbsp;— это точка входа в&nbsp;сценарий возврата, на&nbsp;карточке нужно место для «осталось» и&nbsp;метки пересказа;</li>
+              <li>кольцо-таймер на&nbsp;подсказке и&nbsp;«улетающая» в&nbsp;кнопку искра показывают, где живёт пересказ; нужны&nbsp;ли они, проверим в&nbsp;A/B.</li>
+            </ul>
+            <p>Значения сняты с&nbsp;Android-приложения, поэтому прототип в&nbsp;рамке Pixel.</p>
+          </section>
+
+          <section class="doc__sec">
+            <h2>Работа с&nbsp;ИИ и&nbsp;передача в&nbsp;разработку</h2>
+            <p>Прототип собран в&nbsp;Claude Code: я&nbsp;ставил задачи, принимал продуктовые и&nbsp;дизайнерские решения и&nbsp;проверял результат, ИИ&nbsp;писал код.</p>
+            <p>Для передачи в&nbsp;разработку есть <a href="https://github.com/Alator2001/vk-video-recap/blob/main/SPEC.md" target="_blank" rel="noopener">спецификация</a> (тексты интерфейса, правила показа, события аналитики, A/B, состояния) и&nbsp;<a href="https://github.com/Alator2001/vk-video-recap/blob/main/README.md" target="_blank" rel="noopener">README</a>. Код прототипа демонстрационный, реализация&nbsp;— по&nbsp;спецификации.</p>
+          </section>
+
+          <footer class="doc__foot">
+            <div class="doc__time"><b>≈&nbsp;10&nbsp;часов</b><span>на&nbsp;сборку прототипа за&nbsp;два дня: ~7&nbsp;ч до&nbsp;публикации и&nbsp;~2,5&nbsp;ч на&nbsp;доработки после проверки на&nbsp;телефонах. Ещё ~2&nbsp;ч&nbsp;— выбор идеи и&nbsp;исследование.</span></div>
+            <p class="doc__fine">Концепт, не&nbsp;официальный продукт VK. Данные, каналы и&nbsp;видео в&nbsp;прототипе вымышлены.</p>
+          </footer>
+        </div>
+      </div>
+    </article>
+  </div>
+
   <script src="data.js?v=5"></script>
-  <script src="app.js?v=96"></script>
+  <script src="app.js?v=97"></script>
   <script src="fx.js?v=35"></script>
 </body>
 </html>

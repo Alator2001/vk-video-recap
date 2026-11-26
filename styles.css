@@ -1179,3 +1179,109 @@ body[data-theme="light"] .spec-link__ic { color: var(--accent); }
 .recap__item { transition: background .22s ease-out; }
 .recap__item:hover { transition-duration: 0s; }
 .seg { transition: transform .18s ease-out, background .18s ease-out; }
+
+/* =====================================================================
+   «О решении» — описание отдельным листом поверх сайта. Эстетика Apple:
+   системный шрифт SF, крупные заголовки, много воздуха, мягкие плашки, тонкие разделители.
+   ===================================================================== */
+.doc-layer { --d-bg: #fff; --d-text: #1d1d1f; --d-sub: #6e6e73; --d-tile: #f5f5f7; --d-line: rgba(0,0,0,.1); --d-link: #0066cc; --d-accent: #0071e3; --d-bar: rgba(255,255,255,.72);
+  position: fixed; inset: 0; z-index: 1000; display: grid; place-items: center; visibility: hidden; pointer-events: none; transition: visibility 0s .55s; }
+body[data-theme="dark"] .doc-layer { --d-bg: #1c1c1e; --d-text: #f5f5f7; --d-sub: #a1a1a6; --d-tile: #2c2c2e; --d-line: rgba(255,255,255,.12); --d-link: #2997ff; --d-accent: #0a84ff; --d-bar: rgba(28,28,30,.72); }
+.doc-layer.is-open { visibility: visible; pointer-events: auto; transition: visibility 0s; }
+.doc-scrim { position: absolute; inset: 0; background: rgba(0,0,0,.36); -webkit-backdrop-filter: blur(18px) saturate(1.3); backdrop-filter: blur(18px) saturate(1.3); opacity: 0; transition: opacity .45s ease; }
+.doc-layer.is-open .doc-scrim { opacity: 1; }
+.doc { position: relative; display: flex; flex-direction: column; width: min(820px, calc(100vw - 48px)); height: calc(100vh - 48px); border-radius: 28px; overflow: hidden; outline: none;
+  background: var(--d-bg); color: var(--d-text); box-shadow: 0 40px 120px rgba(0,0,0,.35), 0 0 0 1px var(--d-line);
+  font-family: -apple-system, "SF Pro Text", "SF Pro Display", "Inter", system-ui, sans-serif; -webkit-font-smoothing: antialiased;
+  opacity: 0; transform: translateY(28px) scale(.97); transition: opacity .3s ease, transform .55s cubic-bezier(.32,.72,0,1); }
+.doc-layer.is-open .doc { opacity: 1; transform: none; }
+.doc, .doc * { -webkit-user-select: text; user-select: text; -webkit-touch-callout: default; }
+
+/* шапка листа: прозрачная, при прокрутке — «стекло» с названием */
+.doc__bar { position: absolute; z-index: 2; top: 0; left: 0; right: 0; height: 56px; display: flex; align-items: center; justify-content: center; transition: background .25s, box-shadow .25s; }
+.doc-layer.is-scrolled .doc__bar { background: var(--d-bar); -webkit-backdrop-filter: blur(20px) saturate(1.8); backdrop-filter: blur(20px) saturate(1.8); box-shadow: 0 1px 0 var(--d-line); }
+.doc__bar-title { font-size: 15px; font-weight: 600; opacity: 0; transform: translateY(4px); transition: opacity .25s, transform .25s; }
+.doc-layer.is-scrolled .doc__bar-title { opacity: 1; transform: none; }
+.doc__close { position: absolute; right: 14px; top: 12px; width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; background: var(--d-tile); color: var(--d-sub); cursor: pointer; transition: background .2s, color .2s; }
+.doc__close:hover { color: var(--d-text); }
+.doc__close svg { width: 16px; height: 16px; }
+.doc__scroll { flex: 1; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+.doc__inner { max-width: 640px; margin: 0 auto; padding: 76px 32px 56px; }
+
+/* типографика */
+.doc__eyebrow { margin: 0; font-size: 17px; font-weight: 600; letter-spacing: -.01em; background: linear-gradient(90deg, #4EAFFF, #B984ED 60%, #FF4B9C); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.doc__title { margin: 8px 0 0; font-size: 56px; line-height: 1.04; font-weight: 700; letter-spacing: -.035em; }
+.doc__lead { margin: 18px 0 0; font-size: 21px; line-height: 1.45; color: var(--d-sub); letter-spacing: -.01em; }
+.doc__sec { margin-top: 56px; }
+.doc__sec h2 { margin: 0 0 16px; font-size: 32px; line-height: 1.12; font-weight: 700; letter-spacing: -.025em; }
+.doc__sec p { margin: 0 0 14px; font-size: 17px; line-height: 1.6; letter-spacing: -.01em; }
+.doc a { color: var(--d-link); text-decoration: none; }
+.doc a:hover { text-decoration: underline; }
+
+/* три ключевые цифры */
+.doc__facts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 36px; }
+.fact { padding: 18px 18px 20px; border-radius: 18px; background: var(--d-tile); }
+.fact b { display: block; font-size: 28px; line-height: 1.1; font-weight: 700; letter-spacing: -.025em; }
+.fact span { display: block; margin-top: 8px; font-size: 14px; line-height: 1.4; color: var(--d-sub); }
+
+/* кнопки-ссылки */
+.doc__links { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; }
+.doc .doc__link { display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 18px; border-radius: 999px; background: var(--d-tile); color: var(--d-text); font-size: 15px; font-weight: 600; text-decoration: none; transition: filter .2s, transform .2s; }
+.doc .doc__link:hover { filter: brightness(.96); text-decoration: none; }
+.doc .doc__link:active { transform: scale(.98); }
+.doc .doc__link--primary { background: var(--d-accent); color: #fff; }
+.doc__link svg { width: 14px; height: 14px; }
+
+/* списки с тонкой точкой-акцентом */
+.doc__list { list-style: none; margin: 0; padding: 0; }
+.doc__list li { position: relative; margin: 0 0 14px; padding-left: 22px; font-size: 17px; line-height: 1.6; letter-spacing: -.01em; }
+.doc__list li::before { content: ""; position: absolute; left: 4px; top: .72em; width: 6px; height: 6px; border-radius: 50%; background: var(--d-accent); }
+
+/* цепочка ценности */
+.doc__flow { list-style: none; margin: 4px 0 26px; padding: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; counter-reset: flow; }
+.doc__flow li { counter-increment: flow; display: inline-flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: 14px; background: var(--d-tile); font-size: 15px; font-weight: 600; letter-spacing: -.01em; }
+.doc__flow li::before { content: counter(flow); width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; background: var(--d-accent); color: #fff; font-size: 12px; font-weight: 700; }
+.doc__flow li:not(:last-child)::after { content: "→"; margin-left: 4px; color: var(--d-sub); font-weight: 400; }
+
+/* метрики — как таблица характеристик */
+.doc__spec { margin: 0; }
+.doc__spec > div { display: grid; grid-template-columns: 180px 1fr; gap: 24px; padding: 18px 0; border-top: 1px solid var(--d-line); }
+.doc__spec > div:last-child { border-bottom: 1px solid var(--d-line); }
+.doc__spec dt { font-size: 15px; font-weight: 600; line-height: 1.5; }
+.doc__spec dt small { display: block; margin-top: 2px; font-size: 13px; font-weight: 400; color: var(--d-sub); }
+.doc__spec dd { margin: 0; font-size: 17px; line-height: 1.55; letter-spacing: -.01em; }
+.doc__notes { margin-top: 20px; display: grid; gap: 12px; }
+.doc__notes p { margin: 0; padding: 18px 20px; border-radius: 18px; background: var(--d-tile); font-size: 16px; line-height: 1.55; }
+
+/* подвал */
+.doc__foot { margin-top: 56px; padding-top: 28px; border-top: 1px solid var(--d-line); }
+.doc__time b { display: block; font-size: 40px; line-height: 1.05; font-weight: 700; letter-spacing: -.03em; }
+.doc__time span { display: block; margin-top: 8px; font-size: 15px; line-height: 1.5; color: var(--d-sub); max-width: 520px; }
+.doc__fine { margin: 24px 0 0; font-size: 13px; color: var(--d-sub); }
+
+/* карточка «О решении» в панели — основная, акцентная */
+.spec-link--doc { width: 100%; text-align: left; font: inherit; cursor: pointer; }
+.spec-link--doc .spec-link__ic svg { width: 18px; height: 18px; color: var(--ai-1); }
+.spec-link--doc + .spec-link { margin-top: 8px; }
+
+/* телефон: лист на весь экран, выезжает снизу */
+@media (max-width: 760px) {
+  .doc { width: 100vw; height: calc(100% - env(safe-area-inset-top, 0px) - 10px); margin-top: calc(env(safe-area-inset-top, 0px) + 10px); border-radius: 16px 16px 0 0; align-self: end;
+    transform: translateY(100%); opacity: 1; transition: transform .5s cubic-bezier(.32,.72,0,1); }
+  .doc-layer { place-items: end center; }
+  .doc__inner { padding: 64px 20px 48px; }
+  .doc__title { font-size: 40px; }
+  .doc__lead { font-size: 19px; }
+  .doc__facts { grid-template-columns: 1fr; }
+  .doc__sec { margin-top: 44px; }
+  .doc__sec h2 { font-size: 27px; }
+  .doc__spec > div { grid-template-columns: 1fr; gap: 4px; }
+  .doc__time b { font-size: 32px; }
+}
+@media (prefers-reduced-motion: reduce) { .doc, .doc-scrim { transition: none !important; } }
+
+/* цепочка ценности — четыре равных шага в ряд (на телефоне — в столбик) */
+.doc__flow { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; align-items: stretch; }
+.doc__flow li { flex-direction: column; align-items: flex-start; gap: 10px; padding: 14px; font-size: 14.5px; line-height: 1.35; border-radius: 16px; }
+.doc__flow li:not(:last-child)::after { content: none; }
+@media (max-width: 760px) { .doc__flow { grid-template-columns: 1fr 1fr; } }
