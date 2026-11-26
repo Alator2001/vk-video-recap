@@ -1098,6 +1098,8 @@ body.is-video .statusbar { transition: background .18s linear .28s, color .18s l
    Рамка Android: Google Pixel 10 Pro — экран 412×915 dp, камера-«точка» по центру,
    ровные тонкие рамки, кнопки справа. Статус-бар и полоска жестов — как в Android 16.
    ===================================================================== */
+/* только для рамки на компьютере — на телефоне прототип идёт во весь экран со своими отступами */
+@media (min-width: 761px) {
 .phone { --bezel: 10px; width: calc(412px + var(--bezel) * 2); height: calc(915px + var(--bezel) * 2); border-radius: 54px;
   background: linear-gradient(150deg, #6a6e76 0%, #2c2e33 20%, #1b1c20 50%, #2f3137 80%, #6d717a 100%);
   box-shadow: inset 0 0 0 1px rgba(255,255,255,.16), inset 0 0 0 2px #0c0d10, 0 0 0 1px #0a0b0d, 0 50px 120px rgba(0,0,0,.6), 0 12px 30px rgba(0,0,0,.4); }
@@ -1120,6 +1122,7 @@ body[data-theme="light"] .hw--vol, body[data-theme="light"] .hw--power { backgro
 .statusbar--android .sb-batt__cap { fill-opacity: .5; }
 .punch { position: absolute; left: 50%; top: 12px; width: 15px; height: 15px; margin-left: -7.5px; border-radius: 50%;
   background: radial-gradient(circle at 40% 38%, #232b3d 0 18%, #0a0d14 52%, #000 70%); box-shadow: 0 0 0 1.5px #000; }
+}
 
 /* Полоска жестов Android — на всех экранах, цвет под фон */
 .home-indicator { position: absolute; z-index: 30; left: 50%; bottom: 9px; width: 108px; height: 4px; margin-left: -54px; border-radius: 2px;
@@ -1161,3 +1164,10 @@ body[data-theme="light"] .spec-link { background: rgba(0,0,0,.025); box-shadow: 
 body[data-theme="light"] .spec-link:hover { background: rgba(0,0,0,.045); box-shadow: inset 0 0 0 1px rgba(38,136,235,.35); }
 body[data-theme="light"] .spec-link__t small { color: #5d6670; }
 body[data-theme="light"] .spec-link__ic { color: var(--accent); }
+
+/* Текст в интерфейсе телефона не выделяется — как в нативном приложении (долгое нажатие не вызывает выделение и меню) */
+.screen, .screen *, .demo-status, .demo-status *, .concept-pill { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+@media (max-width: 760px), (pointer: coarse) {
+  body, body * { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+}
+.screen .shelf__row, .screen .chips { scroll-behavior: auto; overscroll-behavior-x: contain; }

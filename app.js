@@ -1006,14 +1006,15 @@
   /* ---------- горизонтальные полки мышью: перетаскивание, как свайп на телефоне ---------- */
   // Тачпад и телефон листают сами; мышь — перетаскиванием. Короткий клик по карточке работает как раньше.
   function dragScroll(row) {
-    let x0 = 0, left0 = 0, dragging = false, down = false, lastX = 0, lastT = 0, v = 0, snapT;
+    let x0 = 0, left0 = 0, dragging = false, down = false, ended = true, lastX = 0, lastT = 0, v = 0, snapT, suppressUntil = 0;
     const scale = () => row.getBoundingClientRect().width / row.offsetWidth || 1;   // телефон-рамка масштабирована
     const release = () => { down = false; };
     row.addEventListener('dragstart', e => e.preventDefault());
     row.addEventListener('pointerdown', e => {
       if (e.pointerType !== 'mouse' || e.button !== 0) return;
       clearTimeout(snapT);
-      down = true; dragging = false; x0 = lastX = e.clientX; left0 = row.scrollLeft; lastT = performance.now(); v = 0;
+      row.scrollTo({ left: row.scrollLeft, behavior: 'instant' });   // остановить докатывание, если оно ещё идёт
+      down = true; dragging = false; ended = false; x0 = lastX = e.clientX; left0 = row.scrollLeft; lastT = performance.now(); v = 0;
     });
     // кнопку отпустили где угодно (в том числе за пределами телефона) — перетаскивание закончено
     addEventListener('pointerup', release, true);
@@ -1031,14 +1032,16 @@
       const now = performance.now(); v = (e.clientX - lastX) / Math.max(1, now - lastT) / k; lastX = e.clientX; lastT = now;
     });
     const end = () => {
-      if (!dragging) return;
+      if (!dragging || ended) return;   // pointerup и lostpointercapture приходят оба — обрабатываем один раз
+      ended = true;
+      suppressUntil = performance.now() + 400;   // ближайший «клик» после перетаскивания — не нажатие на карточку
       row.classList.remove('is-dragging');
       // докатываем к ближайшей карточке с учётом скорости; привязку возвращаем, когда прокрутка закончилась
       const k = scale(), rr = row.getBoundingClientRect();
       // инерция: только если отпустили «на ходу», и не дальше полутора карточек — без резких бросков
       if (performance.now() - lastT > 90) v = 0;
       const card = row.firstElementChild ? row.firstElementChild.offsetWidth + 12 : 200;
-      const fling = Math.max(-card * 1.5, Math.min(card * 1.5, v * 180));
+      const fling = Math.max(-card, Math.min(card, v * 120));   // не дальше одной карточки
       const projected = row.scrollLeft - fling;
       const max = row.scrollWidth - row.clientWidth;
       let best = row.scrollLeft, bd = Infinity;
@@ -1056,7 +1059,10 @@
     row.addEventListener('pointercancel', () => { down = false; end(); });
     row.addEventListener('lostpointercapture', end);
     // после перетаскивания отпускание мыши не считается нажатием на карточку
-    row.addEventListener('click', e => { if (dragging) { e.preventDefault(); e.stopPropagation(); } }, true);
+    const swallow = e => { if (dragging || performance.now() < suppressUntil) { e.preventDefault(); e.stopPropagation(); suppressUntil = 0; } };
+    row.addEventListener('click', swallow, true);
+    // клик после отпускания мыши может прийти не на ленту (на экран или документ) — ловим и там, только сразу после перетаскивания
+    addEventListener('click', e => { if (performance.now() < suppressUntil && row.contains(e.target)) swallow(e); }, true);
   }
   $$('#screen .shelf__row, #screen .chips').forEach(dragScroll);
 
