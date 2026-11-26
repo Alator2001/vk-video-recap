@@ -1340,3 +1340,79 @@ body[data-theme="dark"] .doc-layer { --d-bg: #1c1c1e; --d-text: #f5f5f7; --d-sub
     box-shadow: inset 0 0 0 1px rgba(255,255,255,.16), inset 0 0 0 2px #0c0d10, 0 0 0 1px #0a0b0d, 0 40px 100px rgba(40,50,70,.28), 0 10px 26px rgba(40,50,70,.18); }
   body[data-theme="light"] .hw--vol, body[data-theme="light"] .hw--power { background: linear-gradient(270deg, #1d1e22, #5d616a 60%, #2b2d33); }
 }
+
+/* OKR и риск в листе «О решении» */
+.doc__okr { margin-top: 22px; padding: 20px 22px; border-radius: 18px; background: var(--d-tile); }
+.doc__okr p { margin: 0; font-size: 17px; line-height: 1.5; }
+.doc__okr span { display: inline-block; min-width: 86px; margin-right: 8px; font-size: 13px; font-weight: 700; letter-spacing: .02em; color: var(--d-accent); }
+.doc__okr-o { font-weight: 600; }
+.doc__okr ol { list-style: none; margin: 12px 0 0; padding: 12px 0 0; border-top: 1px solid var(--d-line); display: grid; gap: 8px; }
+.doc__okr li { display: flex; font-size: 16px; line-height: 1.5; }
+.doc__okr li span { flex: none; }
+.doc__okr-t { margin-top: 12px !important; font-size: 14px !important; color: var(--d-sub); }
+.doc__risk { padding: 18px 20px 6px; border-radius: 18px; background: var(--d-tile); }
+.doc__risk > p { margin: 0 0 12px !important; padding: 0 !important; background: none !important; }
+.doc__notes .doc__risk .doc__list li { font-size: 16px; }
+@media (max-width: 760px) { .doc__okr li, .doc__okr p { display: block; } .doc__okr span { display: block; margin-bottom: 2px; } }
+.doc__okr li { display: grid; grid-template-columns: 94px 1fr; }
+@media (max-width: 760px) { .doc__okr li { display: block; } }
+
+/* тест на три группы в листе «О решении» */
+.doc__abc { padding: 18px 20px; border-radius: 18px; background: var(--d-tile); }
+.doc__abc > p { margin: 0 0 14px !important; padding: 0 !important; background: none !important; font-size: 16px; line-height: 1.55; }
+.doc__abc > p:last-child { margin: 14px 0 0 !important; }
+.abc { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.abc__g { padding: 12px 14px; border-radius: 14px; background: var(--d-bg); box-shadow: inset 0 0 0 1px var(--d-line); }
+.abc__g b { display: block; font-size: 22px; line-height: 1; font-weight: 700; color: var(--d-sub); }
+.abc__g span { display: block; margin-top: 8px; font-size: 15px; font-weight: 600; }
+.abc__g small { display: block; margin-top: 2px; font-size: 13px; color: var(--d-sub); }
+.abc__g--on { box-shadow: inset 0 0 0 1.5px var(--d-accent); }
+.abc__g--on b { color: var(--d-accent); }
+.abc__eq { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-top: 12px; font-size: 15px; color: var(--d-sub); }
+.abc__eq b { color: var(--d-text); font-weight: 700; }
+@media (max-width: 760px) { .abc { grid-template-columns: 1fr; } }
+
+/* воронка фичи в листе «О решении» */
+.doc__funnel { margin-top: 22px; padding: 18px 20px; border-radius: 18px; background: var(--d-tile); }
+.doc__funnel > p { margin: 0; font-size: 16px; line-height: 1.55; }
+.funnel { list-style: none; margin: 14px 0; padding: 0; display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; counter-reset: fn; }
+.funnel li { counter-increment: fn; position: relative; padding: 12px 12px 12px; border-radius: 14px; background: var(--d-bg); box-shadow: inset 0 0 0 1px var(--d-line); }
+.funnel li::before { content: counter(fn); display: grid; place-items: center; width: 20px; height: 20px; margin-bottom: 8px; border-radius: 50%; background: var(--d-sub); color: #fff; font-size: 12px; font-weight: 700; }
+.funnel li.is-ai { box-shadow: inset 0 0 0 1.5px var(--d-accent); }
+.funnel li.is-ai::before { background: var(--d-accent); }
+.funnel span { display: block; font-size: 14.5px; font-weight: 600; line-height: 1.3; }
+.funnel small { display: block; margin-top: 3px; font-size: 12.5px; line-height: 1.3; color: var(--d-sub); }
+@media (max-width: 760px) {
+  .funnel { grid-template-columns: 1fr; gap: 6px; }
+  .funnel li { display: flex; align-items: baseline; gap: 10px; padding: 10px 12px; }
+  .funnel li::before { flex: none; margin: 0; transform: translateY(4px); }
+  .funnel small { margin: 0 0 0 auto; text-align: right; }
+}
+
+/* стоимость в листе «О решении» */
+.doc__cost { margin-top: 22px; padding: 18px 20px; border-radius: 18px; background: var(--d-tile); }
+.doc__cost > p { margin: 0; font-size: 16px; line-height: 1.55; }
+.doc__cost > .doc__list { margin: 12px 0 0; }
+.doc__cost > .doc__list li { font-size: 16px; }
+.cost { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 14px 0; }
+.cost__c { padding: 14px; border-radius: 14px; background: var(--d-bg); box-shadow: inset 0 0 0 1px var(--d-line); }
+.cost__c small { display: block; font-size: 12.5px; font-weight: 700; letter-spacing: .02em; color: var(--d-accent); }
+.cost__c > b { display: block; margin-top: 6px; font-size: 15px; line-height: 1.3; }
+.cost__c span { display: block; margin-top: 4px; font-size: 13.5px; line-height: 1.4; color: var(--d-sub); }
+.cost__c--var small { color: var(--d-sub); }
+@media (max-width: 760px) { .cost { grid-template-columns: 1fr; } }
+
+/* остановка и раскатка в листе «О решении» */
+.doc__stop { padding: 18px 20px; border-radius: 18px; background: var(--d-tile); }
+.doc__stop > p { margin: 0 !important; padding: 0 !important; background: none !important; font-size: 16px; line-height: 1.55; }
+.doc__stop > .doc__list { margin: 12px 0 0; }
+.doc__notes .doc__stop .doc__list li { font-size: 16px; }
+.rollout { list-style: none; margin: 14px 0 10px; padding: 0; display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+.rollout li { position: relative; padding: 10px 8px; border-radius: 12px; text-align: center; background: var(--d-bg); box-shadow: inset 0 0 0 1px var(--d-line); }
+.rollout li.is-on { box-shadow: inset 0 0 0 1.5px var(--d-accent); }
+.rollout li.is-on b { color: var(--d-accent); }
+.rollout b { display: block; font-size: 17px; font-weight: 700; line-height: 1.1; }
+.rollout small { display: block; margin-top: 3px; font-size: 12px; line-height: 1.25; color: var(--d-sub); }
+.doc__stop > p.rollout__hold { font-size: 14px; color: var(--d-sub); }
+.rollout__hold b { color: var(--d-text); }
+@media (max-width: 760px) { .rollout { grid-template-columns: repeat(3, 1fr); } }
