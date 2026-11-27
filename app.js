@@ -1135,6 +1135,47 @@
   const docLayer = $('#docLayer'), specLayer = $('#specLayer');
   $('#docOpen').addEventListener('click', () => openLayer(docLayer, $('#docScroll'), 'description_open'));
 
+  // Оглавление листа «О решении»: всегда на виду, одна подложка плавно переезжает к разделу, который сейчас читают
+  (() => {
+    const nav = $('#docNav'), scroll = $('#docScroll'), heads = $$('h2[data-nav]', docLayer);
+    nav.innerHTML = `<p class="doc__nav-title">Содержание</p><ol><span class="doc__nav-ind" aria-hidden="true"></span>${heads.map(h => `<li><a href="#${h.id}" data-to="${h.id}">${esc(h.dataset.nav)}</a></li>`).join('')}</ol>`;
+    const ol = $('ol', nav), ind = $('.doc__nav-ind', nav), links = $$('a', nav);
+    const wide = () => matchMedia('(min-width: 1180px)').matches;
+    const offset = () => (wide() ? 72 : 112);
+    links.forEach(a => a.addEventListener('click', e => {
+      e.preventDefault();
+      scroll.scrollTo({ top: $('#' + a.dataset.to).offsetTop - offset() - 4, behavior: 'smooth' });
+    }));
+    let cur = null, raf = 0;
+    const place = (instant) => {
+      if (!cur) return;
+      if (instant) ind.style.transition = 'none';
+      const li = cur.parentElement;   // координаты считаем от пункта списка: ссылка внутри него стоит в нуле
+      ind.style.width = li.offsetWidth + 'px';
+      ind.style.height = li.offsetHeight + 'px';
+      ind.style.transform = `translate(${li.offsetLeft}px, ${li.offsetTop}px)`;
+      ind.classList.add('is-on');
+      if (instant) { ind.offsetWidth; ind.style.transition = ''; }
+    };
+    const spy = (instant) => {
+      raf = 0;
+      const y = scroll.scrollTop + offset() + 24;
+      let idx = 0;
+      heads.forEach((h, i) => { if (h.offsetTop <= y) idx = i; });
+      if (scroll.scrollTop + scroll.clientHeight >= scroll.scrollHeight - 4) idx = heads.length - 1;
+      const next = links[idx];
+      if (next === cur && !instant) return;
+      if (cur) cur.classList.toggle('is-on', false);
+      cur = next;
+      cur.classList.toggle('is-on', true);
+      place(instant === true);
+      if (!wide() && ol.scrollWidth > ol.clientWidth) ol.scrollTo({ left: cur.parentElement.offsetLeft - 16, behavior: instant === true ? 'auto' : 'smooth' });
+    };
+    scroll.addEventListener('scroll', () => { if (!raf) raf = requestAnimationFrame(() => spy(false)); }, { passive: true });
+    addEventListener('resize', () => { if (docLayer.classList.contains('is-open')) spy(true); });
+    $('#docOpen').addEventListener('click', () => requestAnimationFrame(() => spy(true)));
+  })();
+
   // Спецификация: текст берём из SPEC.md (один источник правды) и показываем в том же стиле
   let specLoaded = false;
   function openSpec() {
@@ -1182,8 +1223,15 @@
       table = [];
     };
     const flushAll = () => { flushPara(); flushQuote(); flushList(); flushTable(); };
+    let fence = null;   // блок ``` — выводим как есть, моноширинным
     lines.forEach(line => {
       let m;
+      if (/^```/.test(line)) {
+        if (fence) { html += `<pre class="doc__pre"><code>${esc(fence.join('\n'))}</code></pre>`; fence = null; }
+        else { flushAll(); fence = []; }
+        return;
+      }
+      if (fence) { fence.push(line); return; }
       if (/^#\s/.test(line)) { flushAll(); return; }   // заголовок документа — в шапке листа
       if ((m = line.match(/^(##+)\s+(.*)$/))) {
         flushAll();
