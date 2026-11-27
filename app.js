@@ -720,6 +720,26 @@
   function ghostPos(x, y, ms) {
     ghost.style.transition = ms ? `transform ${ms}ms cubic-bezier(.45,.05,.25,1), opacity .3s` : 'opacity .3s';
     ghost.style.transform = `translate(${x}px, ${y}px)`;
+    watchGhostHover();
+  }
+  // Демо-курсор ведёт себя как мышь: над плеером показывает его интерфейс, ушёл с плеера — интерфейс прячется
+  let ghostOverPlayer = false, ghostHoverRaf = 0, ghostHoverAt = 0;
+  function ghostLeftPlayer() {
+    ghostOverPlayer = false;
+    clearTimeout(S.hideTimer);
+    S.hideTimer = setTimeout(() => { if (S.playing) player.classList.add('is-clean'); }, 500);
+  }
+  function watchGhostHover() { if (!ghostHoverRaf) ghostHoverRaf = requestAnimationFrame(ghostHoverTick); }
+  function ghostHoverTick(now) {
+    ghostHoverRaf = 0;
+    if (!ghost.classList.contains('is-on')) { if (ghostOverPlayer) ghostLeftPlayer(); return; }
+    const g = ghost.getBoundingClientRect(), p = player.getBoundingClientRect(), s = $('#screen').getBoundingClientRect();
+    const over = player.offsetParent !== null && p.width > 0
+      && g.left >= Math.max(p.left, s.left) && g.left <= Math.min(p.right, s.right)
+      && g.top >= Math.max(p.top, s.top) && g.top <= Math.min(p.bottom, s.bottom);
+    if (over && (!ghostOverPlayer || now - ghostHoverAt > 250)) { ghostOverPlayer = true; ghostHoverAt = now; showControls(true); }
+    else if (!over && ghostOverPlayer) ghostLeftPlayer();
+    ghostHoverRaf = requestAnimationFrame(ghostHoverTick);
   }
   function ghostTarget(el) {   // центр элемента в координатах экрана телефона (с учётом масштаба рамки)
     const sr = $('#screen').getBoundingClientRect(), er = el.getBoundingClientRect();
@@ -1135,10 +1155,9 @@
   const docLayer = $('#docLayer'), specLayer = $('#specLayer');
   $('#docOpen').addEventListener('click', () => openLayer(docLayer, $('#docScroll'), 'description_open'));
 
-  // Оглавление листа «О решении»: всегда на виду, одна подложка плавно переезжает к разделу, который сейчас читают
-  (() => {
-    const nav = $('#docNav'), scroll = $('#docScroll'), heads = $$('h2[data-nav]', docLayer);
-    nav.innerHTML = `<p class="doc__nav-title">Содержание</p><ol><span class="doc__nav-ind" aria-hidden="true"></span>${heads.map(h => `<li><a href="#${h.id}" data-to="${h.id}">${esc(h.dataset.nav)}</a></li>`).join('')}</ol>`;
+  // Оглавление листов: всегда на виду, одна подложка плавно переезжает к разделу, который сейчас читают
+  function makeToc(layer, nav, scroll, heads, label) {
+    nav.innerHTML = `<p class="doc__nav-title">Содержание</p><ol><span class="doc__nav-ind" aria-hidden="true"></span>${heads.map(h => `<li><a href="#${h.id}" data-to="${h.id}">${esc(label(h))}</a></li>`).join('')}</ol>`;
     const ol = $('ol', nav), ind = $('.doc__nav-ind', nav), links = $$('a', nav);
     const wide = () => matchMedia('(min-width: 1180px)').matches;
     const offset = () => (wide() ? 72 : 112);
@@ -1148,9 +1167,8 @@
     }));
     let cur = null, raf = 0;
     const place = (instant) => {
-      if (!cur) return;
-      if (instant) ind.style.transition = 'none';
       const li = cur.parentElement;   // координаты считаем от пункта списка: ссылка внутри него стоит в нуле
+      if (instant) ind.style.transition = 'none';
       ind.style.width = li.offsetWidth + 'px';
       ind.style.height = li.offsetHeight + 'px';
       ind.style.transform = `translate(${li.offsetLeft}px, ${li.offsetTop}px)`;
@@ -1172,9 +1190,11 @@
       if (!wide() && ol.scrollWidth > ol.clientWidth) ol.scrollTo({ left: cur.parentElement.offsetLeft - 16, behavior: instant === true ? 'auto' : 'smooth' });
     };
     scroll.addEventListener('scroll', () => { if (!raf) raf = requestAnimationFrame(() => spy(false)); }, { passive: true });
-    addEventListener('resize', () => { if (docLayer.classList.contains('is-open')) spy(true); });
-    $('#docOpen').addEventListener('click', () => requestAnimationFrame(() => spy(true)));
-  })();
+    addEventListener('resize', () => { if (layer.classList.contains('is-open')) spy(true); });
+    return () => requestAnimationFrame(() => spy(true));
+  }
+  const docTocReset = makeToc(docLayer, $('#docNav'), $('#docScroll'), $$('h2[data-nav]', docLayer), h => h.dataset.nav);
+  $('#docOpen').addEventListener('click', docTocReset);
 
   // Спецификация: текст берём из SPEC.md (один источник правды) и показываем в том же стиле
   let specLoaded = false;
@@ -1254,15 +1274,15 @@
     });
     flushAll();
     $('#specBody').innerHTML = html;
-    $('#specToc').innerHTML = `<p class="doc__toc-title">Содержание</p><ol>${toc.map(t => {
-      const mm = t.text.match(/^(\d+)\.\s*(.*)$/);
-      return `<li><a href="#${t.id}" data-toc="${t.id}"><span>${mm ? mm[1] : ''}</span>${mdInline(mm ? mm[2] : t.text)}</a></li>`;
-    }).join('')}</ol>`;
-    $$('#specToc [data-toc]').forEach(a => a.addEventListener('click', e => {
-      e.preventDefault();
-      const target = document.getElementById(a.dataset.toc), sc = $('#specScroll');
-      sc.scrollTo({ top: target.offsetTop - 70, behavior: 'smooth' });
-    }));
+    // Короткие названия разделов для оглавления — полные заголовки длинные
+    const SHORT = { 1: 'Коротко', 2: 'Что уже есть', 3: 'Цели и границы', 4: 'Сценарии', 5: 'Решение', 6: 'Правила показа',
+      7: 'Данные и качество', 8: 'Полный экран и ТВ', 9: 'Аналитика', 10: 'A/B-тест', 11: 'Дизайн', 12: 'Риски',
+      13: 'Открытые вопросы', 14: 'Этапы', 15: 'Прототип' };
+    const specTocReset = makeToc(specLayer, $('#specNav'), $('#specScroll'), $$('#specBody h2'), h => {
+      const mm = h.textContent.match(/^(\d+)\.\s*(.*)$/);
+      return mm ? (SHORT[mm[1]] || mm[2]) : h.textContent;
+    });
+    specTocReset();
   }
 
   /* ---------- старт ---------- */

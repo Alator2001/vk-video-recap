@@ -21,7 +21,7 @@
   <meta name="twitter:title" content="Продолжить с пересказом — концепт для VK Видео" />
   <meta name="twitter:description" content="ИИ-пересказ просмотренной части, когда возвращаешься к длинному видео. Без спойлеров." />
   <meta name="twitter:image" content="https://alator2001.github.io/vk-video-recap/og.png" />
-  <link rel="stylesheet" href="styles.css?v=120" />
+  <link rel="stylesheet" href="styles.css?v=122" />
 </head>
 <body data-mode="after" data-theme="dark">
   <!-- Тема выставляется до первой отрисовки — без вспышки тёмной темы у тех, кто выбрал светлую -->
@@ -212,7 +212,7 @@
           </header>
           <div class="scroll">
             <div class="list__search" id="listSearch"><svg viewBox="0 0 24 24"><use href="#i-search"/></svg><span>Поиск</span></div>
-            <p class="list__hint" id="listHint"><svg viewBox="0 0 24 24"><use href="#i-spark"/></svg>Недосмотренные видео длиннее 20&nbsp;минут. К&nbsp;каждому есть пересказ того, что вы уже посмотрели</p>
+            <p class="list__hint" id="listHint"><svg viewBox="0 0 24 24"><use href="#i-spark"/></svg>Недосмотренные видео длиннее 20&nbsp;минут. С&nbsp;меткой ✦ можно быстро вспомнить, что вы уже посмотрели</p>
             <div id="continueRows"></div>
             <div class="scroll__pad"></div>
           </div>
@@ -666,15 +666,15 @@
         <span class="doc__bar-title">Спецификация</span>
         <button class="doc__close" data-doc-close aria-label="Закрыть"><svg viewBox="0 0 24 24"><use href="#i-close"/></svg></button>
       </header>
+      <nav class="doc__nav" id="specNav" aria-label="Содержание"></nav>
       <div class="doc__scroll" id="specScroll">
         <div class="doc__inner">
           <p class="doc__eyebrow">Для дизайна, аналитики и разработки</p>
           <h1 class="doc__title" id="specTitle">Спецификация.</h1>
           <p class="doc__lead">«Продолжить с&nbsp;пересказом» для VK Видео: что добавляем в&nbsp;интерфейс, правила показа, данные, аналитика, A/B-тест и&nbsp;этапы.</p>
           <div class="doc__links">
-            <a class="doc__link" href="https://github.com/Alator2001/vk-video-recap/blob/main/SPEC.md" target="_blank" rel="noopener">Открыть на&nbsp;GitHub <svg viewBox="0 0 20 20"><use href="#i-out"/></svg></a>
+            <a class="doc__link" href="https://github.com/Alator2001/vk-video-recap/blob/main/SPEC.md" target="_blank" rel="noopener" aria-label="SPEC.md на GitHub, откроется в новой вкладке"><svg class="doc__link-gh" viewBox="0 0 24 24"><use href="#i-github"/></svg>Открыть на&nbsp;GitHub <svg viewBox="0 0 20 20"><use href="#i-out"/></svg></a>
           </div>
-          <nav class="doc__toc" id="specToc" aria-label="Содержание"></nav>
           <div class="doc__md" id="specBody"><p class="doc__loading">Загружаем спецификацию…</p></div>
         </div>
       </div>
@@ -682,7 +682,7 @@
   </div>
 
   <script src="data.js?v=5"></script>
-  <script src="app.js?v=105"></script>
+  <script src="app.js?v=108"></script>
   <script src="fx.js?v=35"></script>
 </body>
 </html>
