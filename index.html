@@ -21,7 +21,7 @@
   <meta name="twitter:title" content="Продолжить с пересказом — концепт для VK Видео" />
   <meta name="twitter:description" content="ИИ-пересказ просмотренной части, когда возвращаешься к длинному видео. Без спойлеров." />
   <meta name="twitter:image" content="https://alator2001.github.io/vk-video-recap/og.png" />
-  <link rel="stylesheet" href="styles.css?v=129" />
+  <link rel="stylesheet" href="styles.css?v=134" />
 </head>
 <body data-mode="after" data-theme="dark">
   <!-- Тема выставляется до первой отрисовки — без вспышки тёмной темы у тех, кто выбрал светлую -->
@@ -149,7 +149,7 @@
                 <div class="profile__sub">Сменить аккаунт</div>
               </div>
               <button class="icon-btn" aria-label="Уведомления"><svg viewBox="0 0 24 24"><use href="#i-bell"/></svg></button>
-              <button class="icon-btn" aria-label="Настройки"><svg viewBox="0 0 24 24"><use href="#i-gear"/></svg></button>
+              <button class="icon-btn" id="moeSettings" aria-label="Настройки"><svg viewBox="0 0 24 24"><use href="#i-gear"/></svg></button>
             </header>
 
             <div class="chips">
@@ -217,6 +217,28 @@
             <button class="tab"><svg viewBox="0 0 24 24"><use href="#i-subs"/></svg><span>Подписки</span></button>
             <button class="tab is-active"><svg viewBox="0 0 24 24"><use href="#i-me"/></svg><span>Моё</span></button>
           </nav>
+        </section>
+
+        <!-- Экран «Настройки»: раздел «Воспроизведение» с выключателем автопоказа пересказа (НОВОЕ) -->
+        <section class="view view--list" id="viewSettings" aria-label="Настройки">
+          <header class="listhead">
+            <button class="icon-btn" id="setBack" aria-label="Назад"><svg viewBox="0 0 24 24"><use href="#i-back"/></svg></button>
+            <h1 class="listhead__title">Настройки</h1>
+          </header>
+          <div class="scroll">
+            <h2 class="set__group">Воспроизведение</h2>
+            <div class="set__row">
+              <div class="set__text"><b>Автовоспроизведение</b><span>Следующее видео включится само</span></div>
+              <span class="set__sw is-on is-static" aria-hidden="true"><i></i></span>
+            </div>
+            <div class="set__row">
+              <div class="set__text"><b>Качество видео</b><span>Автоматически</span></div>
+            </div>
+            <button class="set__row set__row--new only-after" id="setRecap" role="switch" aria-checked="true">
+              <div class="set__text"><b><svg viewBox="0 0 24 24"><use href="#i-spark"/></svg>Показывать пересказ при возврате к видео</b><span>Под плеером на 8 секунд появится напоминание, что было до места остановки</span></div>
+              <span class="set__sw is-on"><i></i></span>
+            </button>
+          </div>
         </section>
 
         <!-- Экран-список: «Продолжить просмотр» (НОВОЕ) и «История просмотра» (как в приложении) -->
@@ -461,18 +483,15 @@
           <h1 class="doc__title" id="docTitle">Продолжить<br>с&nbsp;пересказом.</h1>
           <p class="doc__lead">ИИ-пересказ уже просмотренной части длинного видео. Помогает вернуться и&nbsp;досмотреть, а&nbsp;не&nbsp;начинать заново, и&nbsp;ничего не&nbsp;спойлерит.</p>
 
-          <div class="doc__time doc__time--top"><b>≈ 7,5&nbsp;часа</b><span>на&nbsp;сборку прототипа: 5&nbsp;ч до&nbsp;публикации и&nbsp;2,5&nbsp;ч на&nbsp;доработку после проверки на&nbsp;других устройствах. Ещё&nbsp;2,5&nbsp;ч ушло на&nbsp;выбор идеи и&nbsp;ресёрч.</span></div>
-
-          <div class="doc__facts">
-            <div class="fact"><b>8&nbsp;с</b><span>подсказка под плеером, когда возвращаешься к&nbsp;видео</span></div>
-            <div class="fact"><b>2&nbsp;входа</b><span>подсказка приходит сама, кнопка ✦ всегда под рукой</span></div>
-            <div class="fact"><b>+2 п.п.</b><span>минимальный рост Resume rate, который должен заметить тест</span></div>
-          </div>
-
           <div class="doc__links">
             <a class="doc__link doc__link--primary" data-open-spec href="https://github.com/Alator2001/vk-video-recap/blob/main/SPEC.md" target="_blank" rel="noopener">Спецификация <svg class="doc__link-go" viewBox="0 0 24 24"><use href="#i-chevron"/></svg></a>
             <a class="doc__link" href="https://github.com/Alator2001/vk-video-recap/blob/main/README.md" target="_blank" rel="noopener" aria-label="README на GitHub, откроется в новой вкладке"><svg class="doc__link-gh" viewBox="0 0 24 24"><use href="#i-github"/></svg>README <svg viewBox="0 0 20 20"><use href="#i-out"/></svg></a>
           </div>
+
+          <section class="doc__sec">
+            <h2 id="doc-time" data-nav="Временные затраты">Временные затраты</h2>
+          <div class="doc__time doc__time--card"><b>5&nbsp;часов</b><span>на&nbsp;сборку прототипа</span><ul class="doc__time-list"><li><span>Доработка после проверки на других устройствах</span><b>~3&nbsp;ч</b></li><li><span>Выбор идеи и ресёрч</span><b>~3&nbsp;ч</b></li><li><span>Продуктовая проработка (метрики, тест, стоимость)</span><b>~4&nbsp;ч</b></li><li><span>Тексты и документация (описание, «О решении», спецификация)</span><b>~4&nbsp;ч</b></li><li><span>Доводка прототипа под приложение и мелкие баги</span><b>~3&nbsp;ч</b></li></ul><p class="doc__time-total">Всего на&nbsp;работу около 22&nbsp;часов</p></div>
+          </section>
 
           <section class="doc__sec">
             <h2 id="doc-s1" data-nav="Проблема">Проблема</h2>
@@ -548,7 +567,7 @@
             <dl class="doc__spec">
               <div><dt>Целевая метрика <small>Resume rate (7d)</small></dt><dd>Доля прерванных просмотров длинных видео (от&nbsp;20&nbsp;минут, остановились между 10% и&nbsp;90%), после которых человек в&nbsp;течение 7&nbsp;дней вернулся к&nbsp;тому&nbsp;же&nbsp;видео и&nbsp;посмотрел ещё&nbsp;хотя&nbsp;бы&nbsp;5&nbsp;минут.<br><b>Пример на&nbsp;условных числах.</b> За&nbsp;неделю 1&nbsp;000&nbsp;человек бросили длинные видео на&nbsp;середине. 300 из&nbsp;них вернулись и&nbsp;посмотрели ещё&nbsp;5+ минут. Resume rate 30%.<br><b>Деталь расчёта.</b> У&nbsp;одного человека бывает много брошенных видео, и&nbsp;ведут они себя похоже: кто возвращается к&nbsp;одному, возвращается и&nbsp;к&nbsp;другим. Поэтому погрешность считаем по&nbsp;людям, а&nbsp;не&nbsp;по&nbsp;просмотрам (дельта-метод). Иначе тест найдёт эффект там, где его нет.</dd></div>
               <div><dt>Бизнес-метрики</dt><dd>Время просмотра длинных видео на&nbsp;пользователя, показы рекламы в&nbsp;длинных видео, удержание в&nbsp;сервисе через 7 и&nbsp;30&nbsp;дней.</dd></div>
-              <div><dt>Контрольные <small>не&nbsp;должны ухудшиться</small></dt><dd><b>Время до&nbsp;старта видео:</b> пересказ подгружается при&nbsp;открытии и&nbsp;не&nbsp;должен тормозить воспроизведение. <b>Ранние уходы:</b> доля открытий видео, после которых человек закрыл его в&nbsp;первые 30&nbsp;секунд. Если подсказка под плеером мешает, таких уходов станет больше. А&nbsp;ещё <b>доля оценок 👎</b> и <b>конверсия промо подписки</b>.</dd></div>
+              <div><dt>Контрольные <small>не&nbsp;должны ухудшиться</small></dt><dd><b>Время до&nbsp;старта видео:</b> пересказ подгружается при&nbsp;открытии и&nbsp;не&nbsp;должен тормозить воспроизведение. <b>Ранние уходы:</b> доля открытий видео, после которых человек закрыл его в&nbsp;первые 30&nbsp;секунд. Если подсказка под плеером мешает, таких уходов станет больше. А&nbsp;ещё <b>доля оценок 👎</b>.</dd></div>
               <div><dt>Подписка <small>отдельный тест</small></dt><dd>Конверсия в&nbsp;подписку из&nbsp;ИИ-функций и&nbsp;удержание подписчиков.</dd></div>
             </dl>
             <div class="doc__okr">
@@ -709,7 +728,7 @@
   </div>
 
   <script src="data.js?v=7"></script>
-  <script src="app.js?v=113"></script>
+  <script src="app.js?v=116"></script>
   <script src="fx.js?v=35"></script>
 </body>
 </html>

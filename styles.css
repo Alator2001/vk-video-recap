@@ -457,13 +457,13 @@ body.is-video .snackbar { bottom: calc(12px + var(--safe-bottom)); }
 /* ================= Мобильный режим: прототип на весь экран ================= */
 /* ================= Подсказки для проверяющего ================= */
 .screen, .screen button { cursor: default; }
-.screen :is(.player__next, #chapterLabel, .promo__close, .vpromo__close, #vMetaBtn, .desc__tc, #descClose, #descRecapMore, #peekCard, #peekClose, .card.is-live, .row.is-live, #continueAll, #historyAll, #listBack, .recap__item, #btnContinue, #btnChapter, #sheetClose, .feedback button, #recapChip, #playBtn, #playerBack, #snackAction, .bar, #playerFrame, #playerUi, .sheet-scrim) { cursor: pointer; }
+.screen :is(.player__next, #chapterLabel, .promo__close, .vpromo__close, #moeSettings, #setBack, #setRecap, #vMetaBtn, .desc__tc, #descClose, #descRecapMore, #peekCard, #peekClose, .card.is-live, .row.is-live, #continueAll, #historyAll, #listBack, .recap__item, #btnContinue, #btnChapter, #sheetClose, .feedback button, #recapChip, #playBtn, #playerBack, #snackAction, .bar, #playerFrame, #playerUi, .sheet-scrim) { cursor: pointer; }
 .sheet__handle { cursor: grab; }
 /* клик мимо — рабочие зоны мигают синим */
 /* Подсветка рабочих зон при нажатии мимо — только контур. Ничего не подменяет (ни фон, ни собственные анимации),
    поэтому не ломает кнопки и пункты пересказа. Свой transition не задаём, чтобы не перебить переходы самих элементов. */
-.screen :is(.promo__close, .vpromo__close, #vMetaBtn, #peekCard, #peekClose, .card.is-live, .row.is-live, #continueAll, #historyAll, #listBack, .recap__item, #btnContinue, #btnChapter, #sheetClose, .feedback button, #recapChip, #playBtn, #playerBack, #snackAction, .player__auto) { outline: 2px solid transparent; outline-offset: 2px; }
-.screen.show-hot :is(.promo__close, .vpromo__close, #vMetaBtn, #peekCard, #peekClose, .card.is-live, .row.is-live, #continueAll, #historyAll, #listBack, .recap__item, #btnContinue, #btnChapter, #sheetClose, .feedback button, #recapChip, #playBtn, #playerBack, #snackAction, .player__auto) { outline-color: rgba(38,136,235,.95); }
+.screen :is(.promo__close, .vpromo__close, #moeSettings, #setBack, #setRecap, #vMetaBtn, #peekCard, #peekClose, .card.is-live, .row.is-live, #continueAll, #historyAll, #listBack, .recap__item, #btnContinue, #btnChapter, #sheetClose, .feedback button, #recapChip, #playBtn, #playerBack, #snackAction, .player__auto) { outline: 2px solid transparent; outline-offset: 2px; }
+.screen.show-hot :is(.promo__close, .vpromo__close, #moeSettings, #setBack, #setRecap, #vMetaBtn, #peekCard, #peekClose, .card.is-live, .row.is-live, #continueAll, #historyAll, #listBack, .recap__item, #btnContinue, #btnChapter, #sheetClose, .feedback button, #recapChip, #playBtn, #playerBack, #snackAction, .player__auto) { outline-color: rgba(38,136,235,.95); }
 
 @media (max-width: 760px) {
   body { display: block; background: var(--bg); overflow: hidden; }
@@ -1607,3 +1607,30 @@ body[data-theme="dark"] .doc-layer { --d-bg: #1c1c1e; --d-text: #f5f5f7; --d-sub
 
 /* номер раздела в оглавлении спецификации */
 .doc__nav-n { display: inline-block; min-width: 1.4em; margin-right: 4px; color: var(--d-sub); font-variant-numeric: tabular-nums; font-weight: 500; }
+
+/* экран «Настройки» */
+.set__group { margin: 14px 16px 6px; font-size: 14px; font-weight: 600; color: var(--text-2); }
+.set__row { display: flex; align-items: center; gap: 14px; width: 100%; padding: 12px 16px; text-align: left; }
+.set__text { flex: 1; min-width: 0; }
+.set__text b { display: flex; align-items: center; gap: 6px; font-size: 16px; font-weight: 500; color: var(--text); }
+.set__text b svg { flex: none; width: 16px; height: 16px; color: var(--ai-1); }
+.set__text span { display: block; margin-top: 3px; font-size: 13.5px; line-height: 1.35; color: var(--text-2); }
+.set__sw { position: relative; flex: none; width: 46px; height: 28px; border-radius: 999px; background: var(--surface-2); transition: background .2s; }
+.set__sw i { position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.3); transition: transform .2s; }
+.set__sw.is-on { background: var(--accent); }
+.set__sw.is-on i { transform: translateX(18px); }
+.set__sw.is-static { opacity: .55; }
+body[data-mode="after"] .set__row.only-after { display: flex; }
+
+/* время работы в шапке листа: главная цифра крупно, остальное мелко */
+.doc__time-list { list-style: none; margin: 14px 0 0; padding: 12px 0 0; border-top: 1px solid var(--d-line); display: grid; gap: 6px; }
+.doc__time-list li { display: flex; justify-content: space-between; gap: 16px; font-size: 13.5px; line-height: 1.4; color: var(--d-sub); }
+.doc__time-list li b { flex: none; font-size: 13.5px; font-weight: 600; letter-spacing: 0; color: var(--d-sub); }
+.doc .doc__time-total { margin: 10px 0 0 !important; padding: 0 !important; background: none !important; font-size: 13.5px; font-weight: 600; color: var(--d-text); }
+.doc__time-list li { align-items: baseline; }
+.doc__time-list li b, .doc__time-list li span { display: inline; margin: 0; line-height: 1.4; max-width: none; }
+
+/* «Временные затраты» отдельной главой */
+.doc__time--card { padding: 18px 20px; border-radius: 18px; background: var(--d-tile); }
+.doc__time--card > b { font-size: 28px; }
+.doc__time--card > span { margin-top: 4px; }

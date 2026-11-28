@@ -31,6 +31,7 @@
     errorResolved: false,
     skips: 0,               // сколько раз подряд пересказ проигнорировали
     autoOff: false,         // автопоказ выключен после 2 пропусков подряд
+    autoshowSetting: true,  // настройка «Показывать пересказ при возврате к видео»
     hideTimer: null,
     tickTimer: null,
   };
@@ -273,6 +274,7 @@
   /* ---------- шторка пересказа ---------- */
   const sheet = $('#sheet'), scrim = $('#sheetScrim');
   function openSheet(trigger) {
+    S.sheetOpenedAt = performance.now();   // для open_ms в recap_closed: прочитали или закрыли сразу
     if (peek.classList.contains('is-on')) hidePeek('open');
     if (trigger === 'chip' || trigger === 'description') {
       S.skips = 0;
@@ -321,7 +323,7 @@
     sheet.classList.remove('is-on'); scrim.classList.remove('is-on'); document.body.classList.remove('sheet-open');
     sheet.style.transform = '';
     clearTimeout(hlOffT); hlCh = -1; highlightChapter(-1);
-    if (method) track('recap_closed', { video_id: M.id, method });
+    if (method) track('recap_closed', { video_id: M.id, method, open_ms: Math.round(performance.now() - (S.sheetOpenedAt || performance.now())) });
   }
   $('#sheetBody').addEventListener('click', e => {
     const it = e.target.closest('.recap__item'); if (!it) return;
@@ -564,6 +566,11 @@
   // решение, что показать при возврате (≥ 24 ч)
   function autoRecap() {
     setPlaying(true);   // видео не ждёт пользователя
+    if (!S.autoshowSetting) {   // человек сам выключил автопоказ в настройках: пересказ только по кнопке ✦
+      track('resume_without_recap', { reason: 'autoshow_off_in_settings' });
+      snack(`Продолжаем с ${fmt(M.stoppedAt)}`);
+      return;
+    }
     if (S.autoOff) {
       track('resume_without_recap', { reason: 'autoshow_off_after_skips' });
       snack(`Продолжаем с ${fmt(M.stoppedAt)}`);
@@ -587,7 +594,7 @@
 
   /* ---------- подсказки для проверяющего ---------- */
   // Что в прототипе реально работает. Клик мимо — рабочие зоны коротко подсвечиваются (как в Figma).
-  const LIVE = `.player__next, .promo__close, .vpromo__close, #vMetaBtn, #descSheet, #sheet, #chSheet, #chapterLabel, #peekCard, #peekClose, .card.is-live, .row.is-live, #continueAll, #historyAll, #listBack, .recap__item, #btnContinue, #btnChapter, #sheetClose, .feedback button,
+  const LIVE = `.player__next, .promo__close, .vpromo__close, #moeSettings, #setBack, #setRecap, #vMetaBtn, #descSheet, #sheet, #chSheet, #chapterLabel, #peekCard, #peekClose, .card.is-live, .row.is-live, #continueAll, #historyAll, #listBack, .recap__item, #btnContinue, #btnChapter, #sheetClose, .feedback button,
     #recapChip:not(.is-hidden), #playBtn, #playerBack, .player__auto, .bar, #snackAction, #playerFrame, #playerUi, .sheet__handle, .sheet-scrim`;
   const screen = $('#screen');
   let flashTimer;
@@ -600,12 +607,13 @@
   // а нажатие мимо коротко подсвечивает рабочие зоны.
 
   /* ---------- навигация ---------- */
-  const viewMoe = $('#viewMoe'), viewVideo = $('#viewVideo'), viewList = $('#viewList');
+  const viewMoe = $('#viewMoe'), viewVideo = $('#viewVideo'), viewList = $('#viewList'), viewSettings = $('#viewSettings');
   function showView(v) {
     const listShown = v === viewList || (v === viewVideo && S.from === viewList);
     viewMoe.classList.toggle('is-active', v === viewMoe);
     viewMoe.classList.toggle('is-under', v !== viewMoe);
-    viewMoe.classList.toggle('is-pushed', listShown);
+    viewMoe.classList.toggle('is-pushed', listShown || v === viewSettings);
+    viewSettings.classList.toggle('is-active', v === viewSettings);
     viewList.classList.toggle('is-active', v === viewList);
     viewList.classList.toggle('is-under', v === viewVideo && S.from === viewList);
     viewVideo.classList.toggle('is-active', v === viewVideo);
@@ -687,6 +695,21 @@
   $('#historyAll').addEventListener('click', () => openList('history'));
   $('#listBack').addEventListener('click', () => { showView(viewMoe); });
 
+  /* ---------- настройки: выключатель автопоказа пересказа ---------- */
+  function setAutoshowSetting(on, silent) {
+    S.autoshowSetting = on;
+    const row = $('#setRecap');
+    row.setAttribute('aria-checked', on);
+    $('.set__sw', row).classList.toggle('is-on', on);
+    if (silent) return;
+    if (on) { S.autoOff = false; S.skips = 0; updateStyleNote(); }   // явное включение сбрасывает и счётчик пропусков
+    track(on ? 'recap_autoshow_on' : 'recap_autoshow_off', { reason: 'settings' });
+    snack(on ? 'Пересказ снова будет появляться, когда вы вернётесь к видео' : 'Пересказ больше не будет появляться сам. Он всегда под кнопкой ✦');
+  }
+  $('#moeSettings').addEventListener('click', () => { showView(viewSettings); $('#viewSettings .scroll').scrollTop = 0; });
+  $('#setBack').addEventListener('click', () => showView(viewMoe));
+  $('#setRecap').addEventListener('click', () => setAutoshowSetting(!S.autoshowSetting));
+
   /* ---------- панель ---------- */
   function setMode(m) {
     S.mode = m; document.body.dataset.mode = m;
@@ -697,6 +720,7 @@
   function setScenario(sc) {
     closeVideo(true);   // сначала закрываем текущее видео — иначе сброс краевого случая в closeVideo перетрёт новый сценарий
     S.scenario = sc; S.errorResolved = false; S.skips = 0; S.autoOff = false;
+    setAutoshowSetting(true, true);   // сценарии всегда начинаются с включённой настройки
   }
   const panel = $('#panel');
   const closePanel = () => panel.classList.remove('is-open');
@@ -945,7 +969,7 @@
     } else {
       $('#recapChip').classList.toggle('is-hidden', S.scenario === 'nospeech' || (S.scenario === 'error' && !S.errorResolved));
       // плашка появляется прямо на глазах
-      if (!descOpen && S.scenario === 'days' && !S.autoOff) setTimeout(showPeek, 250);
+      if (!descOpen && S.scenario === 'days' && !S.autoOff && S.autoshowSetting) setTimeout(showPeek, 250);
     }
     // перерисовать описание: блок пересказа появляется или исчезает
     if (descOpen) openDesc();
@@ -1208,7 +1232,8 @@
     addEventListener('resize', () => { if (layer.classList.contains('is-open')) spy(true); });
     return () => requestAnimationFrame(() => spy(true));
   }
-  const docTocReset = makeToc(docLayer, $('#docNav'), $('#docScroll'), $$('h2[data-nav]', docLayer), h => h.dataset.nav);
+  const docHeads = $$('h2[data-nav]', docLayer);
+  const docTocReset = makeToc(docLayer, $('#docNav'), $('#docScroll'), docHeads, h => h.dataset.nav, h => docHeads.indexOf(h) + 1);
   $('#docOpen').addEventListener('click', docTocReset);
 
   // Спецификация: текст берём из SPEC.md (один источник правды) и показываем в том же стиле
