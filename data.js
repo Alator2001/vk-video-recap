@@ -177,6 +177,18 @@ window.DATA = {
       thumb: { img: 'media/thumbs/c_audience.jpg', text: 'Итоги года', plate: '#FFD166' } }
   ],
 
+  // «Мне понравилось»: видео для наполнения, не открываются
+  liked: {
+    videos: [
+      { id: 'k1', title: 'Как снимать кино на телефон: свет, звук и монтаж', channel: 'Киноразбор', duration: 1284,
+        thumb: { img: 'media/thumbs/c_clap.jpg', text: 'Кино\nна телефон', plate: '#FFD84D' } },
+      { id: 'k2', title: 'Разбор данных за 10 минут: таблицы, которые врут', channel: 'Школа данных', duration: 642,
+        thumb: { img: 'media/thumbs/p_data.jpg' } },
+      { id: 'k3', title: 'Кинотеатр будущего: как изменится зал', channel: 'Кино и цифры', duration: 2213,
+        thumb: { img: 'media/thumbs/c_seats.jpg' } }
+    ]
+  },
+
   also: [
     { title: 'Продуктовый разговор #41: зачем продакту SQL', channel: 'Продуктовый разговор', duration: 7420, views: '890 тыс просмотров',
       thumb: { img: 'media/thumbs/p_team.jpg', text: 'SQL для продакта', plate: '#7CC4FF' } },

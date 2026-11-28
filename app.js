@@ -108,6 +108,14 @@
         <div class="card__title">${esc(v.title)}</div>
         <div class="card__ch"><span>${esc(v.channel)}</span></div>
       </button>`).join('');
+
+    // «Мне понравилось»: понравившиеся видео
+    $('#likedRow').innerHTML = D.liked.videos.map(v => `
+      <button class="card" data-src="liked">
+        ${thumb(v.thumb, { dur: fmt(v.duration) })}
+        <div class="card__title">${esc(v.title)}</div>
+        <div class="card__ch"><span>${esc(v.channel)}</span></div>
+      </button>`).join('');
   }
 
   /* ---------- экран «Продолжить просмотр» ---------- */
@@ -227,6 +235,13 @@
   });
   $('#playerUi').addEventListener('click', e => { if (e.target === e.currentTarget && S.playing) player.classList.add('is-clean'); });
   $('#playBtn').addEventListener('click', e => { e.stopPropagation(); setPlaying(!S.playing); });
+  // автовоспроизведение в верхней панели плеера: переключатель только для вида, как в приложении
+  $('.player__auto').addEventListener('click', e => {
+    e.stopPropagation();
+    const on = e.currentTarget.classList.toggle('is-on');
+    e.currentTarget.setAttribute('aria-checked', on);
+    showControls(true);
+  });
 
   // перемотка по полосе
   const tip = $('#barTip');
@@ -572,8 +587,8 @@
 
   /* ---------- подсказки для проверяющего ---------- */
   // Что в прототипе реально работает. Клик мимо — рабочие зоны коротко подсвечиваются (как в Figma).
-  const LIVE = `.player__next, .promo__close, #vMetaBtn, #descSheet, #sheet, #chSheet, #chapterLabel, #peekCard, #peekClose, .card.is-live, .row.is-live, #continueAll, #historyAll, #listBack, .recap__item, #btnContinue, #btnChapter, #sheetClose, .feedback button,
-    #recapChip:not(.is-hidden), #playBtn, #playerBack, .bar, #snackAction, #playerFrame, #playerUi, .sheet__handle, .sheet-scrim`;
+  const LIVE = `.player__next, .promo__close, .vpromo__close, #vMetaBtn, #descSheet, #sheet, #chSheet, #chapterLabel, #peekCard, #peekClose, .card.is-live, .row.is-live, #continueAll, #historyAll, #listBack, .recap__item, #btnContinue, #btnChapter, #sheetClose, .feedback button,
+    #recapChip:not(.is-hidden), #playBtn, #playerBack, .player__auto, .bar, #snackAction, #playerFrame, #playerUi, .sheet__handle, .sheet-scrim`;
   const screen = $('#screen');
   let flashTimer;
   screen.addEventListener('click', e => {
@@ -952,10 +967,8 @@
     closePanel();
   }));
 
-  /* ---------- плашка «Отключить рекламу»: крестик сворачивает её ---------- */
-  const promo = $('.promo');
-  $('.promo__close').addEventListener('click', e => {
-    e.stopPropagation();
+  /* ---------- промо Премиума (в «Моё» и под видео): крестик сворачивает плашку ---------- */
+  function collapsePromo(promo, place) {
     if (promo.dataset.closing) return;
     promo.dataset.closing = '1';
     const cs = getComputedStyle(promo), h = promo.offsetHeight;
@@ -970,8 +983,10 @@
         { height: '0px', marginTop: '0px', marginBottom: '0px', paddingTop: '0px', paddingBottom: '0px', minHeight: '0px' }
       ], { duration: 340, easing: 'cubic-bezier(.32,.72,0,1)', fill: 'forwards' }).onfinish = () => { promo.style.display = 'none'; };
     }, 160);
-    track('promo_close', { place: 'moe', promo: 'premium_trial' });
-  });
+    track('promo_close', { place, promo: 'premium_trial' });
+  }
+  $('.promo__close').addEventListener('click', e => { e.stopPropagation(); collapsePromo($('.promo'), 'moe'); });
+  $('.vpromo__close').addEventListener('click', e => { e.stopPropagation(); collapsePromo($('.vpromo'), 'video'); });
 
   /* ---------- «таблетка» переключателей ---------- */
   function syncPill(box) {
@@ -1156,8 +1171,8 @@
   $('#docOpen').addEventListener('click', () => openLayer(docLayer, $('#docScroll'), 'description_open'));
 
   // Оглавление листов: всегда на виду, одна подложка плавно переезжает к разделу, который сейчас читают
-  function makeToc(layer, nav, scroll, heads, label) {
-    nav.innerHTML = `<p class="doc__nav-title">Содержание</p><ol><span class="doc__nav-ind" aria-hidden="true"></span>${heads.map(h => `<li><a href="#${h.id}" data-to="${h.id}">${esc(label(h))}</a></li>`).join('')}</ol>`;
+  function makeToc(layer, nav, scroll, heads, label, num) {
+    nav.innerHTML = `<p class="doc__nav-title">Содержание</p><ol><span class="doc__nav-ind" aria-hidden="true"></span>${heads.map(h => `<li><a href="#${h.id}" data-to="${h.id}">${num ? `<span class="doc__nav-n">${num(h)}</span>` : ''}${esc(label(h))}</a></li>`).join('')}</ol>`;
     const ol = $('ol', nav), ind = $('.doc__nav-ind', nav), links = $$('a', nav);
     const wide = () => matchMedia('(min-width: 1180px)').matches;
     const offset = () => (wide() ? 72 : 112);
@@ -1275,13 +1290,13 @@
     flushAll();
     $('#specBody').innerHTML = html;
     // Короткие названия разделов для оглавления — полные заголовки длинные
-    const SHORT = { 1: 'Коротко', 2: 'Что уже есть', 3: 'Цели и границы', 4: 'Сценарии', 5: 'Решение', 6: 'Правила показа',
+    const SHORT = { 1: 'Коротко', 2: 'Что уже есть', 3: 'Цели и границы', 4: 'Когда показываем', 5: 'Решение', 6: 'Правила показа',
       7: 'Данные и качество', 8: 'Полный экран и ТВ', 9: 'Аналитика', 10: 'A/B-тест', 11: 'Дизайн', 12: 'Риски',
       13: 'Открытые вопросы', 14: 'Этапы', 15: 'Прототип' };
     const specTocReset = makeToc(specLayer, $('#specNav'), $('#specScroll'), $$('#specBody h2'), h => {
       const mm = h.textContent.match(/^(\d+)\.\s*(.*)$/);
       return mm ? (SHORT[mm[1]] || mm[2]) : h.textContent;
-    });
+    }, h => (h.textContent.match(/^(\d+)\./) || [, ''])[1]);   // номер раздела: в тексте спецификации ссылки идут на номера
     specTocReset();
   }
 

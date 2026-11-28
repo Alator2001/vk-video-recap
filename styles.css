@@ -457,13 +457,13 @@ body.is-video .snackbar { bottom: calc(12px + var(--safe-bottom)); }
 /* ================= Мобильный режим: прототип на весь экран ================= */
 /* ================= Подсказки для проверяющего ================= */
 .screen, .screen button { cursor: default; }
-.screen :is(.player__next, #chapterLabel, .promo__close, #vMetaBtn, .desc__tc, #descClose, #descRecapMore, #peekCard, #peekClose, .card.is-live, .row.is-live, #continueAll, #historyAll, #listBack, .recap__item, #btnContinue, #btnChapter, #sheetClose, .feedback button, #recapChip, #playBtn, #playerBack, #snackAction, .bar, #playerFrame, #playerUi, .sheet-scrim) { cursor: pointer; }
+.screen :is(.player__next, #chapterLabel, .promo__close, .vpromo__close, #vMetaBtn, .desc__tc, #descClose, #descRecapMore, #peekCard, #peekClose, .card.is-live, .row.is-live, #continueAll, #historyAll, #listBack, .recap__item, #btnContinue, #btnChapter, #sheetClose, .feedback button, #recapChip, #playBtn, #playerBack, #snackAction, .bar, #playerFrame, #playerUi, .sheet-scrim) { cursor: pointer; }
 .sheet__handle { cursor: grab; }
 /* клик мимо — рабочие зоны мигают синим */
 /* Подсветка рабочих зон при нажатии мимо — только контур. Ничего не подменяет (ни фон, ни собственные анимации),
    поэтому не ломает кнопки и пункты пересказа. Свой transition не задаём, чтобы не перебить переходы самих элементов. */
-.screen :is(.promo__close, #vMetaBtn, #peekCard, #peekClose, .card.is-live, .row.is-live, #continueAll, #historyAll, #listBack, .recap__item, #btnContinue, #btnChapter, #sheetClose, .feedback button, #recapChip, #playBtn, #playerBack, #snackAction) { outline: 2px solid transparent; outline-offset: 2px; }
-.screen.show-hot :is(.promo__close, #vMetaBtn, #peekCard, #peekClose, .card.is-live, .row.is-live, #continueAll, #historyAll, #listBack, .recap__item, #btnContinue, #btnChapter, #sheetClose, .feedback button, #recapChip, #playBtn, #playerBack, #snackAction) { outline-color: rgba(38,136,235,.95); }
+.screen :is(.promo__close, .vpromo__close, #vMetaBtn, #peekCard, #peekClose, .card.is-live, .row.is-live, #continueAll, #historyAll, #listBack, .recap__item, #btnContinue, #btnChapter, #sheetClose, .feedback button, #recapChip, #playBtn, #playerBack, #snackAction, .player__auto) { outline: 2px solid transparent; outline-offset: 2px; }
+.screen.show-hot :is(.promo__close, .vpromo__close, #vMetaBtn, #peekCard, #peekClose, .card.is-live, .row.is-live, #continueAll, #historyAll, #listBack, .recap__item, #btnContinue, #btnChapter, #sheetClose, .feedback button, #recapChip, #playBtn, #playerBack, #snackAction, .player__auto) { outline-color: rgba(38,136,235,.95); }
 
 @media (max-width: 760px) {
   body { display: block; background: var(--bg); overflow: hidden; }
@@ -1571,3 +1571,39 @@ body[data-theme="dark"] .doc-layer { --d-bg: #1c1c1e; --d-text: #f5f5f7; --d-sub
   .doc__md .doc__table { padding: 0; background: none; }
 }
 .doc__md .doc__table code { background: var(--d-bg); }
+
+/* «Мои плейлисты»: строка «Создать плейлист» */
+.pl-create { display: flex; align-items: center; gap: 14px; margin: 2px 16px 0; padding: 0; text-align: left; }
+.pl-create__ic { flex: none; width: 48px; height: 48px; border-radius: 10px; display: grid; place-items: center; background: var(--surface); color: var(--link); }
+.pl-create__ic svg { width: 24px; height: 24px; }
+.pl-create__t { font-size: 16px; font-weight: 500; color: var(--link); }
+
+/* интерфейс плеера как в приложении VK Видео: «свернуть» и знак слева, оценка, автовоспроизведение и настройки справа */
+.player__back { left: 4px; top: 4px; }
+.player__back svg { transform: rotate(90deg); width: 26px; height: 26px; }
+.player__top { position: absolute; right: 6px; top: 6px; display: flex; align-items: center; gap: 4px; }
+.player__tb { width: 36px; height: 36px; display: grid; place-items: center; color: #fff; }
+.player__tb svg { width: 22px; height: 22px; }
+.player__auto { position: relative; width: 38px; height: 22px; margin: 0 6px; border-radius: 999px; background: rgba(255,255,255,.32); transition: background .2s; }
+.player__auto i { position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; border-radius: 50%; background: #fff; color: #000; display: grid; place-items: center; transition: transform .2s; }
+.player__auto.is-on i { transform: translateX(16px); }
+.player__auto svg { width: 10px; height: 10px; margin-left: 1px; }
+.player__icons { gap: 18px; }
+.player__back { top: 4px; }
+
+/* курсор в плеере: «рука» только над тем, что работает; над декоративными значками и временем — обычная стрелка */
+.screen :is(.player__tb, .player__icons, .player__icons *, .player__time, .player__time *) { cursor: default; }
+.screen :is(.player__auto, #playBtn, #playerBack, .player__next, #chapterLabel, .bar, .bar *) { cursor: pointer; }
+
+/* промо Премиума под видео, как в приложении: картинка слева, текст, крестик */
+.vpromo { display: flex; align-items: center; gap: 14px; margin: 28px 16px 4px; }
+.vpromo__art { position: relative; overflow: hidden; flex: none; width: 37%; aspect-ratio: 16/9; border-radius: 12px; display: grid; place-items: center;
+  background: radial-gradient(70% 150% at 42% 75%, rgba(66, 98, 150, .55) 0%, rgba(66, 98, 150, 0) 70%), linear-gradient(120deg, #03235a 0%, #0b2858 55%, #082350 100%); }
+.vpromo__art::after { content: ""; position: absolute; top: -20%; bottom: -20%; left: 62%; width: 40%; transform: skewX(-24deg); border-left: 1px solid rgba(170, 196, 236, .28); background: linear-gradient(90deg, rgba(150, 178, 224, .14), rgba(150, 178, 224, .04)); }
+.vpromo__art img { position: relative; z-index: 1; width: 42%; height: auto; }
+.vpromo__text { flex: 1; min-width: 0; font-size: 16px; line-height: 1.3; color: var(--text); }
+.vpromo__close { flex: none; width: 32px; height: 32px; display: grid; place-items: center; color: var(--text-2); }
+.vpromo__close svg { width: 20px; height: 20px; }
+
+/* номер раздела в оглавлении спецификации */
+.doc__nav-n { display: inline-block; min-width: 1.4em; margin-right: 4px; color: var(--d-sub); font-variant-numeric: tabular-nums; font-weight: 500; }

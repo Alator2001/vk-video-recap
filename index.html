@@ -21,7 +21,7 @@
   <meta name="twitter:title" content="Продолжить с пересказом — концепт для VK Видео" />
   <meta name="twitter:description" content="ИИ-пересказ просмотренной части, когда возвращаешься к длинному видео. Без спойлеров." />
   <meta name="twitter:image" content="https://alator2001.github.io/vk-video-recap/og.png" />
-  <link rel="stylesheet" href="styles.css?v=122" />
+  <link rel="stylesheet" href="styles.css?v=129" />
 </head>
 <body data-mode="after" data-theme="dark">
   <!-- Тема выставляется до первой отрисовки — без вспышки тёмной темы у тех, кто выбрал светлую -->
@@ -191,6 +191,22 @@
               </div>
               <div class="shelf__row" id="laterRow"></div>
             </section>
+            <section class="shelf">
+              <div class="shelf__head">
+                <h2 class="shelf__title">Мне понравилось</h2>
+                <button class="shelf__more">Показать все</button>
+              </div>
+              <div class="shelf__row" id="likedRow"></div>
+            </section>
+            <section class="shelf">
+              <div class="shelf__head">
+                <h2 class="shelf__title">Мои плейлисты</h2>
+              </div>
+              <button class="pl-create" type="button">
+                <span class="pl-create__ic"><svg viewBox="0 0 24 24"><use href="#i-playlist-add"/></svg></span>
+                <span class="pl-create__t">Создать плейлист</span>
+              </button>
+            </section>
             <div class="scroll__pad"></div>
           </div>
 
@@ -233,7 +249,12 @@
               <video class="player__video" id="playerVideo" muted loop playsinline preload="auto" aria-hidden="true"></video>
             </div>
             <div class="player__ui" id="playerUi">
-              <button class="player__back" id="playerBack" aria-label="Назад"><svg viewBox="0 0 24 24"><use href="#i-back"/></svg></button>
+              <button class="player__back" id="playerBack" aria-label="Свернуть"><svg viewBox="0 0 24 24"><use href="#i-chevron"/></svg></button>
+              <div class="player__top">
+                <button class="player__tb" aria-label="Оценить видео"><svg viewBox="0 0 24 24"><use href="#i-star-q"/></svg></button>
+                <button class="player__auto is-on" role="switch" aria-checked="true" aria-label="Автовоспроизведение"><i><svg viewBox="0 0 24 24"><use href="#i-play"/></svg></i></button>
+                <button class="player__tb" aria-label="Настройки"><svg viewBox="0 0 24 24"><use href="#i-gear"/></svg></button>
+              </div>
               <div class="player__center">
                 <button class="player__play" id="playBtn" aria-label="Пауза"><svg viewBox="0 0 24 24"><use href="#i-pause"/></svg></button>
                 <button class="player__next" aria-label="Следующее"><svg viewBox="0 0 24 24"><use href="#i-next"/></svg></button>
@@ -244,7 +265,6 @@
                   <button class="player__chapter" id="chapterLabel" aria-label="Главы">Ошибки новичков</button>
                   <span class="player__icons">
                     <svg viewBox="0 0 24 24"><use href="#i-cast"/></svg>
-                    <svg viewBox="0 0 24 24"><use href="#i-gear"/></svg>
                     <svg viewBox="0 0 24 24"><use href="#i-full"/></svg>
                   </span>
                 </div>
@@ -298,6 +318,11 @@
               <div class="comments">
                 <div class="comments__head">Комментарии <span id="vComments">842</span></div>
                 <div class="comments__row"><div class="avatar avatar--xs" id="vCommentAv">М</div><p id="vComment"></p></div>
+              </div>
+              <div class="vpromo">
+                <div class="vpromo__art"><img src="media/vk-video-logo.png" width="53" height="53" alt="" aria-hidden="true" /></div>
+                <div class="vpromo__text">С Премиум рекламы не будет — 14 дней бесплатно</div>
+                <button class="vpromo__close" aria-label="Скрыть"><svg viewBox="0 0 24 24"><use href="#i-close"/></svg></button>
               </div>
               <div class="also">
                 <h2 class="also__title">Смотрите также</h2>
@@ -414,6 +439,8 @@
       <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 11v5.5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/><circle cx="12" cy="7.8" r="1.15" fill="currentColor"/></symbol>
       <symbol id="i-article" viewBox="0 0 20 20"><path fill="currentColor" d="M6.916 2h6.168c1.434 0 2.132.135 2.857.523a3.6 3.6 0 0 1 1.536 1.536c.388.725.523 1.423.523 2.857v6.168c0 1.434-.135 2.132-.523 2.857a3.6 3.6 0 0 1-1.536 1.536c-.725.388-1.423.523-2.857.523H6.916c-1.434 0-2.132-.135-2.857-.523a3.6 3.6 0 0 1-1.536-1.536C2.135 15.216 2 14.518 2 13.084V6.916c0-1.434.135-2.132.523-2.857a3.6 3.6 0 0 1 1.536-1.536C4.784 2.135 5.482 2 6.916 2Zm0 1.5c-1.208 0-1.672.09-2.15.345a2.1 2.1 0 0 0-.92.92c-.256.479-.346.943-.346 2.151v6.168c0 1.208.09 1.672.345 2.15.214.4.522.707.921.921.478.256.942.345 2.15.345h6.168c1.208 0 1.672-.09 2.15-.345a2.1 2.1 0 0 0 .921-.92c.256-.479.345-.943.345-2.151V6.916c0-1.208-.09-1.672-.345-2.15a2.1 2.1 0 0 0-.92-.921c-.479-.256-.943-.345-2.151-.345H6.916ZM6.75 6h6.5a.75.75 0 0 1 0 1.5h-6.5a.75.75 0 0 1 0-1.5Zm0 3.25h6.5a.75.75 0 0 1 0 1.5h-6.5a.75.75 0 0 1 0-1.5Zm0 3.25h4.5a.75.75 0 0 1 0 1.5h-4.5a.75.75 0 0 1 0-1.5Z"/></symbol>
       <symbol id="i-github" viewBox="0 0 24 24"><path fill="currentColor" d="M12 .5C5.73.5.5 5.74.5 12.02c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.56v-1.97c-3.2.7-3.87-1.54-3.87-1.54-.52-1.33-1.28-1.69-1.28-1.69-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.19 1.76 1.19 1.03 1.76 2.69 1.25 3.35.96.1-.75.4-1.25.73-1.54-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a10.9 10.9 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.84 1.19 3.1 0 4.42-2.69 5.39-5.26 5.68.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.53 11.53 0 0 0 23.5 12.02C23.5 5.74 18.27.5 12 .5z"/></symbol>
+    <symbol id="i-playlist-add" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M4 6.5h13M4 11.5h13M4 16.5h7.5M18 14v7M14.5 17.5h7"/></g></symbol>
+    <symbol id="i-star-q" viewBox="0 0 24 24"><path d="M12 3.2l2.6 5.3 5.8.85-4.2 4.1 1 5.8L12 16.5l-5.2 2.75 1-5.8-4.2-4.1 5.8-.85z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="17.6" cy="17.6" r="5" fill="currentColor"/><path d="M16.2 16.4a1.45 1.45 0 1 1 2.1 1.3c-.45.24-.7.5-.7.95v.25" fill="none" stroke="#000" stroke-width="1.4" stroke-linecap="round"/><circle cx="17.6" cy="20.35" r=".8" fill="#000"/></symbol>
     <symbol id="i-out" viewBox="0 0 20 20"><path fill="currentColor" d="M15.747 12.378a.75.75 0 0 1-1.5-.001l.002-5.566-8.719 8.72a.75.75 0 1 1-1.06-1.061l8.72-8.72H7.58a.75.75 0 0 1 0-1.5H15l.148.015A.75.75 0 0 1 15.75 5l-.003 7.378Z"/></symbol>
     </defs>
   </svg>
@@ -681,8 +708,8 @@
     </article>
   </div>
 
-  <script src="data.js?v=5"></script>
-  <script src="app.js?v=108"></script>
+  <script src="data.js?v=7"></script>
+  <script src="app.js?v=113"></script>
   <script src="fx.js?v=35"></script>
 </body>
 </html>
